@@ -1,0 +1,30 @@
+{
+    "name": "onetracepro/onetrace-magento2",
+    "description": "Magento 2 / Adobe Commerce module for the OneTrace.pro customer data platform: server-side orders, customers and newsletter consents, the website tracker, product catalog sync, recommendation widgets and Web Push.",
+    "type": "magento2-module",
+    "license": "MIT",
+    "keywords": ["onetrace", "magento", "magento2", "adobe commerce", "cdp", "customer data platform", "ecommerce", "marketing automation", "recommendations", "abandoned cart"],
+    "homepage": "https://onetrace.pro",
+    "support": {
+        "issues": "https://github.com/OneTracePro/onetrace-magento2/issues",
+        "source": "https://github.com/OneTracePro/onetrace-magento2"
+    },
+    "require": {
+        "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
+        "magento/framework": "^103.0.7",
+        "magento/module-catalog": "^104.0",
+        "magento/module-checkout": "^100.4",
+        "magento/module-configurable-product": "^100.4",
+        "magento/module-customer": "^103.0",
+        "magento/module-newsletter": "^100.4",
+        "magento/module-sales": "^103.0",
+        "magento/module-store": "^101.1",
+        "onetracepro/onetrace-php": "^1.2"
+    },
+    "autoload": {
+        "files": ["registration.php"],
+        "psr-4": {
+            "OneTrace\\Connector\\": ""
+        }
+    }
+}

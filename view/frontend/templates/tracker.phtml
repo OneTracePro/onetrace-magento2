@@ -1,0 +1,18 @@
+<?php
+/** @var \OneTrace\Connector\Block\Tracker $block */
+/** @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer */
+if (!$block->enabled()) {
+    return;
+}
+$settings = $block->settings();
+$script = sprintf(
+    "(function(w,d,s,c){c=w.cdp=w.cdp||[];if(c.version)return;s.methods.forEach(function(m){c[m]=c[m]||function(){c.push([m].concat([].slice.call(arguments)))}});"
+    . "var loaded=false,load=function(){if(loaded)return;loaded=true;var e=d.createElement('script');e.async=1;e.src=s.script;d.head.appendChild(e)};"
+    . "var allowed=function(){if(!s.consent)return true;var m=d.cookie.match(new RegExp('(?:^|; )'+s.consent.cookie+'=([^;]*)'));if(!m)return false;try{return !!JSON.parse(decodeURIComponent(m[1]))[s.consent.website]}catch(x){return false}};"
+    . "if(allowed())load();else var t=setInterval(function(){if(allowed()){clearInterval(t);load()}},1000);"
+    . "cdp.init(s.key,s.options);cdp.page()})(window,document,%s);",
+    json_encode($settings, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP)
+);
+?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $script, false) ?>
+<script type="text/x-magento-init">{"*": {"OneTrace_Connector/js/visitor": {}}}</script>

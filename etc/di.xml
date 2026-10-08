@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="onetrace_test" xsi:type="object">OneTrace\Connector\Console\TestCommand</item>
+                <item name="onetrace_status" xsi:type="object">OneTrace\Connector\Console\StatusCommand</item>
+                <item name="onetrace_flush" xsi:type="object">OneTrace\Connector\Console\FlushCommand</item>
+                <item name="onetrace_sync_catalog" xsi:type="object">OneTrace\Connector\Console\SyncCatalogCommand</item>
+            </argument>
+        </arguments>
+    </type>
+    <!-- Console commands are built on every bin/magento run: their dependencies are loaded only when they run. -->
+    <type name="OneTrace\Connector\Console\TestCommand">
+        <arguments>
+            <argument name="status" xsi:type="object">OneTrace\Connector\Model\Status\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="OneTrace\Connector\Console\StatusCommand">
+        <arguments>
+            <argument name="queue" xsi:type="object">OneTrace\Connector\Model\Queue\Proxy</argument>
+            <argument name="status" xsi:type="object">OneTrace\Connector\Model\Status\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="OneTrace\Connector\Console\FlushCommand">
+        <arguments>
+            <argument name="queue" xsi:type="object">OneTrace\Connector\Model\Queue\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="OneTrace\Connector\Console\SyncCatalogCommand">
+        <arguments>
+            <argument name="sync" xsi:type="object">OneTrace\Connector\Model\CatalogSync\Proxy</argument>
+            <argument name="queue" xsi:type="object">OneTrace\Connector\Model\Queue\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="Magento\Config\Model\Config\TypePool">
+        <arguments>
+            <argument name="sensitive" xsi:type="array">
+                <item name="onetrace/connection/secret_key" xsi:type="string">1</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

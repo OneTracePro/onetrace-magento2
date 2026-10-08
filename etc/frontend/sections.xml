@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Customer:etc/sections.xsd">
+    <!-- The signed-in customer for the tracker: refreshed on login and logout (private content, works with the page cache). -->
+    <action name="customer/account/loginPost">
+        <section name="onetrace"/>
+    </action>
+    <action name="customer/account/createpost">
+        <section name="onetrace"/>
+    </action>
+    <action name="customer/account/logout">
+        <section name="onetrace"/>
+    </action>
+    <action name="customer/ajax/login">
+        <section name="onetrace"/>
+    </action>
+</config>

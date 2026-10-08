@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    name: Magento ${{ matrix.magento }} · PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { magento: '2.4.7', php: '8.3', tag: 'php83-fpm-magento2.4.7' }
+          - { magento: '2.4.8', php: '8.4', tag: 'php84-fpm-magento2.4.8-p5' }
+          - { magento: '2.4.9', php: '8.5', tag: 'php85-fpm-magento2.4.9' }
+    steps:
+      - uses: actions/checkout@v5
+      - name: Integration tests in a ready Magento image
+        run: tests/env/run.sh
+        env:
+          MAGENTO_TAG: ${{ matrix.tag }}
+      - name: Storefront over HTTP
+        run: tests/env/smoke.sh
+        env:
+          MAGENTO_TAG: ${{ matrix.tag }}
+
+  coding-standard:
+    name: Magento coding standard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2
+      - run: composer validate --no-check-lock
+      - name: phpcs --standard=Magento2
+        run: |
+          mkdir -p /tmp/mcs && cd /tmp/mcs && echo '{}' > composer.json
+          composer config allow-plugins true -n
+          composer require -n --no-progress magento/magento-coding-standard
+          vendor/bin/phpcs --standard=Magento2 --extensions=php,phtml,xml --severity=10 --ignore='*/Test/*,*/tests/*' "$GITHUB_WORKSPACE"

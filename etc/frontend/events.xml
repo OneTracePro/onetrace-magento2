@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="customer_login">
+        <observer name="onetrace_customer_login" instance="OneTrace\Connector\Observer\CustomerChanged"/>
+    </event>
+    <event name="checkout_cart_product_add_after">
+        <observer name="onetrace_cart_added" instance="OneTrace\Connector\Observer\CartAdded"/>
+    </event>
+    <event name="sales_quote_remove_item">
+        <observer name="onetrace_cart_removed" instance="OneTrace\Connector\Observer\CartRemoved"/>
+    </event>
+    <event name="controller_action_predispatch_checkout_index_index">
+        <observer name="onetrace_checkout_started" instance="OneTrace\Connector\Observer\CheckoutStarted"/>
+    </event>
+</config>

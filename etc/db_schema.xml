@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <!-- Outgoing queue: messages and catalog changes are sent in batches by cron, the store never waits for the platform. -->
+    <table name="onetrace_queue" resource="default" engine="innodb" comment="OneTrace outgoing queue">
+        <column xsi:type="bigint" name="id" unsigned="true" nullable="false" identity="true"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" default="0"/>
+        <column xsi:type="varchar" name="kind" nullable="false" length="16"/>
+        <column xsi:type="varchar" name="item_key" nullable="false" length="191" default=""/>
+        <column xsi:type="mediumtext" name="payload" nullable="false"/>
+        <column xsi:type="smallint" name="attempts" unsigned="true" nullable="false" default="0"/>
+        <column xsi:type="datetime" name="available_at" nullable="false"/>
+        <column xsi:type="text" name="last_error" nullable="true"/>
+        <column xsi:type="datetime" name="created_at" nullable="false"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <index referenceId="ONETRACE_QUEUE_KIND_AVAILABLE" indexType="btree">
+            <column name="kind"/>
+            <column name="available_at"/>
+        </index>
+        <index referenceId="ONETRACE_QUEUE_STORE_ITEM_KEY" indexType="btree">
+            <column name="store_id"/>
+            <column name="item_key"/>
+        </index>
+    </table>
+    <!-- The visitor's tracker id of an order: later order events land in the same profile as the order. -->
+    <table name="onetrace_order" resource="default" engine="innodb" comment="OneTrace order visitor">
+        <column xsi:type="int" name="order_id" unsigned="true" nullable="false"/>
+        <column xsi:type="varchar" name="anonymous_id" nullable="false" length="255"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="order_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="ONETRACE_ORDER_ORDER_ID_SALES_ORDER_ENTITY_ID" table="onetrace_order" column="order_id" referenceTable="sales_order" referenceColumn="entity_id" onDelete="CASCADE"/>
+    </table>
+</schema>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Runs inside the Magento container of tests/env/run.sh, from /data. -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         bootstrap="bootstrap.php"
+         colors="true"
+         failOnWarning="true">
+    <testsuites>
+        <testsuite name="Integration">
+            <directory>Integration</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

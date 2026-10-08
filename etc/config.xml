@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <onetrace>
+            <connection>
+                <url/>
+                <write_key/>
+                <secret_key backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
+            </connection>
+            <parts>
+                <tracker>1</tracker>
+                <wait_for_consent>1</wait_for_consent>
+                <orders>1</orders>
+                <cart>1</cart>
+                <catalog>1</catalog>
+                <newsletter>1</newsletter>
+            </parts>
+            <consent>
+                <topic/>
+            </consent>
+            <widgets>
+                <product/>
+                <cart/>
+                <push>0</push>
+            </widgets>
+        </onetrace>
+    </default>
+</config>

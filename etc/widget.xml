@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Widget:etc/widget.xsd">
+    <widget id="onetrace_recommendations" class="OneTrace\Connector\Block\Widget">
+        <label translate="true">OneTrace recommendations</label>
+        <description translate="true">A recommendation widget from the "Site → Widgets" section of the OneTrace platform.</description>
+        <parameters>
+            <parameter name="widget_id" xsi:type="text" required="true" visible="true">
+                <label translate="true">Widget id</label>
+            </parameter>
+        </parameters>
+    </widget>
+</widgets>

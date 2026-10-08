@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="before.body.end">
+            <block class="OneTrace\Connector\Block\ProductView" name="onetrace.product.view" template="OneTrace_Connector::product_view.phtml"/>
+        </referenceContainer>
+        <referenceContainer name="content.aside">
+            <block class="OneTrace\Connector\Block\Widget" name="onetrace.widget.product" before="-">
+                <arguments>
+                    <argument name="place" xsi:type="string">product</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

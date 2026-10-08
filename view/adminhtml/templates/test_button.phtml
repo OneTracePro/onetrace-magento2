@@ -1,0 +1,29 @@
+<?php
+/** @var \OneTrace\Connector\Block\Adminhtml\TestButton $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$stats = $block->stats();
+$error = $block->lastError();
+?>
+<div id="onetrace-test">
+    <button type="button" class="action-default" data-url="<?= $escaper->escapeUrl($block->testUrl()) ?>" onclick="onetraceCall(this)"><?= $escaper->escapeHtml(__('Test connection')) ?></button>
+    <button type="button" class="action-default" data-url="<?= $escaper->escapeUrl($block->syncUrl()) ?>" onclick="onetraceCall(this)"><?= $escaper->escapeHtml(__('Upload the whole catalog')) ?></button>
+    <p class="note"><span><?= $escaper->escapeHtml(__('Queue: %1 waiting, %2 of them after an error.', $stats['waiting'], $stats['retrying'])) ?></span></p>
+    <?php if ($error !== null): ?>
+        <p class="note"><span><?= $escaper->escapeHtml(__('Last error: %1', $error)) ?></span></p>
+    <?php endif; ?>
+    <ul id="onetrace-test-result" class="note"></ul>
+</div>
+<script>
+    function onetraceCall(button) {
+        require(['jquery'], function ($) {
+            var list = $('#onetrace-test-result').empty();
+            $.post(button.getAttribute('data-url'), {form_key: window.FORM_KEY}).done(function (response) {
+                (response.results || []).forEach(function (result) {
+                    $('<li/>').text((result.ok ? '✓ ' : '✗ ') + result.message).css('color', result.ok ? '#185b00' : '#e22626').appendTo(list);
+                });
+            }).fail(function () {
+                $('<li/>').text('✗ Request failed').appendTo(list);
+            });
+        });
+    }
+</script>

@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="onetrace" translate="label" sortOrder="400">
+            <label>OneTrace</label>
+        </tab>
+        <section id="onetrace" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>OneTrace</label>
+            <tab>onetrace</tab>
+            <resource>OneTrace_Connector::config</resource>
+            <group id="connection" translate="label comment" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Connection</label>
+                <comment>Keys are in the "API keys" section of your OneTrace project. A store view can be connected to its own project.</comment>
+                <field id="url" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Platform address</label>
+                    <comment>The address you open the platform at, e.g. https://cdp.onetrace.pro or the domain of your brand.</comment>
+                    <validate>validate-url</validate>
+                </field>
+                <field id="write_key" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Write key</label>
+                    <comment>cdp_wk_… — for the tracker on the storefront.</comment>
+                </field>
+                <field id="secret_key" translate="label comment" type="obscure" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Secret key</label>
+                    <comment>cdp_sk_… with the products.write permission — for orders, customers and the catalog.</comment>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="test" translate="label" type="button" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Connection check</label>
+                    <frontend_model>OneTrace\Connector\Block\Adminhtml\TestButton</frontend_model>
+                </field>
+            </group>
+            <group id="parts" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>What to send</label>
+                <field id="tracker" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Tracker</label>
+                    <comment>Page and product views on the storefront.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="wait_for_consent" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Cookie consent</label>
+                    <comment>With "Cookie Restriction Mode" on, load the tracker after the visitor allows cookies.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="orders" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Orders</label>
+                    <comment>Placed, paid (invoiced), cancelled and refunded orders with the customer data.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="cart" translate="label comment" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Cart</label>
+                    <comment>Adding to and removing from the cart, opening the checkout — for abandoned cart journeys.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="catalog" translate="label comment" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Product catalog</label>
+                    <comment>Products and categories for recommendations and emails, updated when products change and daily.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="newsletter" translate="label comment" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Newsletter subscriptions</label>
+                    <comment>Subscribing and unsubscribing in the store (registration, account, footer form) become consents in OneTrace.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+            <group id="consent" translate="label" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Newsletter consent</label>
+                <field id="topic" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Subscription topic</label>
+                    <comment>Empty — the whole email channel.</comment>
+                </field>
+            </group>
+            <group id="widgets" translate="label comment" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Recommendations and Web Push</label>
+                <comment>Widget ids are in the "Site → Widgets" section of the platform. Anywhere else add the "OneTrace recommendations" widget in Content → Widgets.</comment>
+                <field id="product" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Widget on the product page</label>
+                </field>
+                <field id="cart" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Widget in the cart</label>
+                </field>
+                <field id="push" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Web Push</label>
+                    <comment>Serve /cdp-sw.js from the store root.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

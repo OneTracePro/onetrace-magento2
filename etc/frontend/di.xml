@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- /cdp-sw.js: the Web Push service worker must come from the store's own domain. -->
+    <type name="Magento\Framework\App\RouterList">
+        <arguments>
+            <argument name="routerList" xsi:type="array">
+                <item name="onetrace_service_worker" xsi:type="array">
+                    <item name="class" xsi:type="string">OneTrace\Connector\Controller\ServiceWorkerRouter</item>
+                    <item name="disable" xsi:type="boolean">false</item>
+                    <item name="sortOrder" xsi:type="string">5</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Customer\CustomerData\SectionPoolInterface">
+        <arguments>
+            <argument name="sectionSourceMap" xsi:type="array">
+                <item name="onetrace" xsi:type="string">OneTrace\Connector\CustomerData\Visitor</item>
+            </argument>
+        </arguments>
+    </type>
+</config>
