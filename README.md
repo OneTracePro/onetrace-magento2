@@ -10,7 +10,7 @@ Connects a Magento 2 / Adobe Commerce store to [OneTrace.pro](https://onetrace.p
 
 - Magento Open Source and Adobe Commerce 2.4.7–2.4.9, PHP 8.2–8.5
 - Orders and their statuses are sent from the server through a cron queue with retries: checkout never waits for the platform
-- Settings per store view: each store view can send to its own project
+- Settings per store view: each store view can send to its own project; store views of one project in other languages translate its catalog
 - The same events and properties as every OneTrace shop plugin ([e-commerce contract](https://onetrace.pro/en/docs/api)), built on [onetrace-php](https://github.com/OneTracePro/onetrace-php)
 
 ## What it sends
@@ -24,6 +24,7 @@ Connects a Magento 2 / Adobe Commerce store to [OneTrace.pro](https://onetrace.p
 | `add_to_cart`, `remove_from_cart`, `checkout_started` | cart changes and the checkout page, for visitors with the tracker cookie or signed in | server |
 | `product_viewed`, page views | the storefront | browser tracker, works with the full page cache and Varnish |
 | Product catalog | product changes, daily, and the "Upload the whole catalog" button | server, `products.write` |
+| `search` | the first page of the store search results, with "Product search" on | server |
 
 Guest orders without the tracker cookie are linked by email; later events of an order (invoice, refund) use the browser of its checkout, so everything lands in one profile.
 
@@ -45,6 +46,18 @@ bin/magento setup:static-content:deploy
 
 - Widgets from **Site → Widgets** of the platform: set their ids for the product page and the cart in the settings, or add the **OneTrace recommendations** widget in **Content → Widgets**. The current product, category and cart products are passed to the widget.
 - Web Push: turn it on in the settings — the module serves `/cdp-sw.js` from the store root.
+
+## Languages of the catalog
+
+The catalog of a project comes from its first store view. Other store views connected to the same project (the same address and secret key) with another locale (**Stores → Configuration → General → Locale Options**) add translations: product names, their links in that store view, category names and the values of visible attributes. The platform shows recommendations, widgets, search results and emails in the visitor's language.
+
+## Product search
+
+Turn on **Product search** in the settings (the plan of the project must include it):
+
+- The quick search results page keeps your theme and layered navigation, but its products, their order and their number come from OneTrace: word forms, typos, a query typed in the wrong keyboard layout, the visitor's interests. Sorting by price and the category and price filters go to the platform.
+- The search box shows suggestions of the tracker while typing: popular queries, categories and products with pictures and prices.
+- Filters by other attributes, sorting by name and any error of the platform keep Magento's own search. The layered navigation counts come from Magento's search.
 
 ## Privacy
 

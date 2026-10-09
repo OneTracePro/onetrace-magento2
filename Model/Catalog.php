@@ -17,7 +17,8 @@ use OneTrace\Commerce\CatalogItem;
 
 /**
  * Product catalog of a store view on the platform. Only products visible in the catalog are items: a simple
- * product of a configurable one uploads its parent, so recommendations work on the product level.
+ * product of a configurable one uploads its parent, so recommendations work on the product level. Other store views
+ * of the same project with another locale add translations (Config::translationStores()).
  */
 class Catalog
 {
@@ -33,6 +34,7 @@ class Catalog
         private readonly Configurable $configurable,
         private readonly StoreManagerInterface $storeManager,
         private readonly Emulation $emulation,
+        private readonly Config $config,
     ) {
     }
 
@@ -65,7 +67,7 @@ class Catalog
      *
      * @param list<int> $productIds
      *
-     * @return array{0: list<array<string, mixed>>, 1: list<array{id: string, name: string, parent_id?: string}>, 2: list<string>}
+     * @return array{0: list<array<string, mixed>>, 1: list<array<string, mixed>>, 2: list<string>}
      */
     public function items(int $storeId, array $productIds): array
     {
@@ -83,6 +85,7 @@ class Catalog
             $currency = (string) $store->getCurrentCurrencyCode();
             $mediaUrl = rtrim((string) $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA), '/') . '/catalog/product';
             $items = [];
+            $labels = [];
             $categoryLists = [];
             $found = [];
 
@@ -96,15 +99,90 @@ class Catalog
 
                 $categories = $this->categoryIds($product);
                 $categoryLists[] = $categories;
-                $items[] = $this->item($product, $categories, $currency, $mediaUrl);
+                $attributes = $this->attributeValues($product);
+                $labels[(string) $product->getId()] = array_map(static fn (array $attribute): string => $attribute[0], $attributes);
+                $items[] = $this->item($product, $categories, $currency, $mediaUrl, $attributes);
             }
 
             $missing = array_values(array_map('strval', array_diff($productIds, $found)));
-
-            return [$items, $this->categories(array_merge([], ...$categoryLists)), $missing];
+            $categories = $this->categories(array_merge([], ...$categoryLists));
         } finally {
             $this->emulation->stopEnvironmentEmulation();
         }
+
+        foreach ($this->config->translationStores($storeId) as $locale => $translationStoreId) {
+            [$items, $categories] = $this->translate($translationStoreId, $locale, $items, $labels, $categories);
+        }
+
+        return [$items, $categories, $missing];
+    }
+
+    /**
+     * Translations of items and categories from another store view of the project: the name, the link of that
+     * store view and the values of visible attributes (under the labels of the main store view), category names.
+     * Products not assigned to the website of that store view get no translation.
+     *
+     * @param list<array<string, mixed>> $items
+     * @param array<string, array<string, string>> $labels product id => attribute code => label of the main store view
+     * @param list<array<string, mixed>> $categories
+     *
+     * @return array{0: list<array<string, mixed>>, 1: list<array<string, mixed>>}
+     */
+    private function translate(int $storeId, string $locale, array $items, array $labels, array $categories): array
+    {
+        if ($items === []) {
+            return [$items, $categories];
+        }
+
+        $this->emulation->startEnvironmentEmulation($storeId, \Magento\Framework\App\Area::AREA_FRONTEND, true);
+
+        try {
+            $collection = $this->products->create()
+                ->setStoreId($storeId)
+                ->addStoreFilter($storeId)
+                ->addIdFilter(array_map('intval', array_column($items, 'id')))
+                ->addAttributeToSelect(['name', 'url_key'])
+                ->addUrlRewrite();
+            $texts = [];
+
+            /** @var Product $product */
+            foreach ($collection as $product) {
+                $texts[(string) $product->getId()] = [(string) $product->getName(), (string) $product->getProductUrl(), array_map(static fn (array $attribute): string => $attribute[1], $this->attributeValues($product))];
+            }
+
+            foreach ($items as $index => $item) {
+                if (!isset($texts[(string) $item['id']])) {
+                    continue;
+                }
+
+                [$name, $url, $values] = $texts[(string) $item['id']];
+                $params = [];
+
+                foreach ($labels[(string) $item['id']] ?? [] as $code => $label) {
+                    if (isset($values[$code]) && $values[$code] !== ($item['params'][$label] ?? null)) {
+                        $params[$label] = $values[$code];
+                    }
+                }
+
+                $items[$index] = CatalogItem::translate($item, $locale, $name !== $item['name'] ? $name : null, $url !== ($item['url'] ?? null) ? $url : null, $params);
+            }
+
+            foreach ($categories as $index => $category) {
+                try {
+                    $name = (string) $this->categoryRepository->get((int) $category['id'], $storeId)->getName();
+                } catch (NoSuchEntityException) {
+                    continue;
+                }
+
+                if ($name !== '' && $name !== $category['name']) {
+                    $categories[$index] = CatalogItem::translateCategory($category, $locale, $name);
+                }
+            }
+        } finally {
+            $this->emulation->stopEnvironmentEmulation();
+        }
+
+        return [$items, $categories];
     }
 
     /**
@@ -137,10 +215,11 @@ class Catalog
 
     /**
      * @param list<int> $categories the deepest first
+     * @param array<string, array{0: string, 1: string}> $attributes attributeValues()
      *
      * @return array<string, mixed>
      */
-    private function item(Product $product, array $categories, string $currency, string $mediaUrl): array
+    private function item(Product $product, array $categories, string $currency, string $mediaUrl, array $attributes): array
     {
         $final = (float) $product->getPriceInfo()->getPrice('final_price')->getAmount()->getValue();
         $regular = (float) $product->getPriceInfo()->getPrice('regular_price')->getAmount()->getValue();
@@ -157,7 +236,7 @@ class Catalog
             $categories,
             $regular > $final ? $regular : null,
             $this->brand($product),
-            $this->attributes($product)
+            array_column($attributes, 1, 0)
         );
     }
 
@@ -242,11 +321,11 @@ class Catalog
     }
 
     /**
-     * Attributes visible on the product page: "Color" => "White".
+     * Attributes visible on the product page: "color" => ["Color", "White"] (the label and the value of the store view).
      *
-     * @return array<string, string>
+     * @return array<string, array{0: string, 1: string}>
      */
-    private function attributes(Product $product): array
+    private function attributeValues(Product $product): array
     {
         $params = [];
 
@@ -258,7 +337,7 @@ class Catalog
             $value = $attribute->getFrontend()->getValue($product);
 
             if (is_scalar($value) && (string) $value !== '' && strcasecmp((string) $value, 'No') !== 0) {
-                $params[(string) $attribute->getStoreLabel()] = strip_tags((string) $value);
+                $params[(string) $attribute->getAttributeCode()] = [(string) $attribute->getStoreLabel(), strip_tags((string) $value)];
             }
         }
 

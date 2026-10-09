@@ -16,7 +16,7 @@ use OneTrace\Connector\Model\Config;
 class Tracker extends Template
 {
     /** Methods the stub queues until cdp.js loads: the same list as in the platform's install code. */
-    private const STUB_METHODS = ['init', 'page', 'track', 'identify', 'alias', 'reset', 'setLanguage', 'widgets', 'renderRecommendations'];
+    private const STUB_METHODS = ['init', 'page', 'track', 'identify', 'alias', 'reset', 'setLanguage', 'widgets', 'renderRecommendations', 'searchBoxes'];
 
     public function __construct(
         Context $context,
@@ -32,6 +32,22 @@ class Tracker extends Template
         $storeId = (int) $this->_storeManager->getStore()->getId();
 
         return $this->config->storefront($storeId) && $this->config->enabled('tracker', $storeId);
+    }
+
+    /**
+     * Suggestions of the tracker in the store search box ("Product search" setting).
+     */
+    public function searchEnabled(): bool
+    {
+        $storeId = (int) $this->_storeManager->getStore()->getId();
+
+        return $this->enabled() && $this->config->enabled('search', $storeId);
+    }
+
+    /** Category link of the suggestions: {id} is replaced with the category id of the catalog. */
+    public function categoryUrl(): string
+    {
+        return str_replace('ID', '{id}', $this->getUrl('catalog/category/view', ['id' => 'ID']));
     }
 
     /**

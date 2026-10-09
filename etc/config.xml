@@ -14,6 +14,7 @@
                 <cart>1</cart>
                 <catalog>1</catalog>
                 <newsletter>1</newsletter>
+                <search>0</search>
             </parts>
             <consent>
                 <topic/>

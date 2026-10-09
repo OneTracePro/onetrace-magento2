@@ -2,6 +2,13 @@
 
 All notable changes are documented here. The project follows [Semantic Versioning](https://semver.org/).
 
+## 1.1.0 — 2026-10-09
+
+- Catalog languages: store views of one project (the same address and secret key) with another locale add translations to the catalog of the first store view — product names, links of that store view, category names and the values of visible attributes. Recommendations, widgets, search and emails show the visitor's language.
+- Product search from OneTrace (the "Product search" setting, off by default): the quick search results keep Magento's page and layered navigation, but take the products, their order and their number from the platform (word forms, typos, the wrong keyboard layout, the visitor's interests), with the price sorting and the category and price filters; the results page sends the `search` event. Filters by other attributes, sorting by name and any API error keep Magento's search.
+- Suggestions while typing in the store search box (the tracker instead of Magento's autocomplete).
+- Requires onetrace-php 1.4.
+
 ## 1.0.0 — 2026-10-08
 
 First release.

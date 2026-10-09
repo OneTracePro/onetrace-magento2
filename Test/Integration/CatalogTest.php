@@ -8,6 +8,7 @@ use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Api\Data\CategoryInterfaceFactory;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product\Visibility;
+use Magento\Catalog\Model\ResourceModel\Product\Action as ProductAction;
 use OneTrace\Connector\Test\TestCase;
 
 final class CatalogTest extends TestCase
@@ -42,6 +43,32 @@ final class CatalogTest extends TestCase
         self::assertSame(['DELETE', ['ids' => [(string) $product->getId()]]], [$last['method'], $last['body']]);
 
         $this->admin(fn () => $categories->delete($child) && $categories->delete($parent));
+    }
+
+    public function testUploadsTranslationsFromAnotherStoreViewOfTheProject(): void
+    {
+        $store = $this->storeView('onetrace_ru', ['general/locale/code' => 'ru_RU', 'web/unsecure/base_link_url' => 'http://localhost/ru/', 'web/secure/base_link_url' => 'http://localhost/ru/']);
+        $categories = $this->om->get(CategoryRepositoryInterface::class);
+        $category = $this->admin(fn () => $categories->save($this->om->get(CategoryInterfaceFactory::class)->create()->setName('Shoes')->setUrlKey('shoes-' . bin2hex(random_bytes(3)))->setParentId(2)->setIsActive(true)));
+        $product = $this->product(['category_ids' => [(int) $category->getId()]]);
+        $this->om->get(ProductAction::class)->updateAttributes([(int) $product->getId()], ['name' => 'Кроссовки'], $store);
+        $translated = $categories->get((int) $category->getId(), $store);
+        $translated->setName('Обувь');
+        $translated->getResource()->saveAttribute($translated, 'name');
+
+        try {
+            $this->flush();
+            $body = end($this->platform->requests)['body'];
+            $item = $body['items'][0];
+
+            self::assertSame('Sneakers', $item['name'], 'The first store view gives the main language.');
+            self::assertSame('Кроссовки', $item['translations']['ru-RU']['name']);
+            self::assertStringStartsWith('http://localhost/ru/', $item['translations']['ru-RU']['url']);
+            self::assertContains(['id' => (string) $category->getId(), 'name' => 'Shoes', 'translations' => ['ru-RU' => ['name' => 'Обувь']]], $body['categories']);
+        } finally {
+            $this->deleteStoreView($store);
+            $this->admin(fn () => $categories->delete($category));
+        }
     }
 
     public function testDoesNotUploadProductsHiddenFromTheCatalog(): void

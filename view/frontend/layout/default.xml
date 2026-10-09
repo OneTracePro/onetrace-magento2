@@ -4,5 +4,8 @@
         <referenceBlock name="head.additional">
             <block class="OneTrace\Connector\Block\Tracker" name="onetrace.tracker" template="OneTrace_Connector::tracker.phtml"/>
         </referenceBlock>
+        <referenceContainer name="before.body.end">
+            <block class="OneTrace\Connector\Block\Tracker" name="onetrace.search" template="OneTrace_Connector::search.phtml"/>
+        </referenceContainer>
     </body>
 </page>

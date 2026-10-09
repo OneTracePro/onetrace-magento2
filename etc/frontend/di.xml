@@ -19,4 +19,8 @@
             </argument>
         </arguments>
     </type>
+    <!-- Product search from OneTrace: products of the quick search results ("Product search" setting). -->
+    <type name="Magento\Search\Api\SearchInterface">
+        <plugin name="onetrace_search" type="OneTrace\Connector\Plugin\Search"/>
+    </type>
 </config>

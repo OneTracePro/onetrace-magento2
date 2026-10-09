@@ -20,6 +20,8 @@ if ! docker ps --format '{{.Names}}' | grep -qx "$NAME"; then
     docker exec "$NAME" sh -c '
         set -e
         composer config repositories.onetrace path extensions/onetrace-magento2
+        # Composer 2.10 refuses packages with security advisories, and Magento 2.4.7 itself locks league/flysystem 2.
+        composer config policy.advisories.block false 2>/dev/null || true
         composer require "onetracepro/onetrace-magento2:@dev" --no-plugins --no-interaction --quiet
         php bin/magento module:enable OneTrace_Connector >/dev/null
         php bin/magento setup:upgrade --keep-generated >/dev/null

@@ -81,6 +81,46 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * A store view of the main website with its own settings (store scope), e.g. another language of the store.
+     *
+     * @param array<string, string> $settings
+     */
+    protected function storeView(string $code, array $settings = []): int
+    {
+        $store = $this->om->create(\Magento\Store\Model\Store::class);
+        $store->setCode($code)->setName($code)->setWebsiteId(1)->setGroupId(1)->setSortOrder(100)->setIsActive(1);
+        $store->getResource()->save($store);
+        $writer = $this->om->get(ConfigWriter::class);
+
+        foreach ($settings as $path => $value) {
+            $writer->saveConfig($path, $value, \Magento\Store\Model\ScopeInterface::SCOPE_STORES, (int) $store->getId());
+        }
+
+        $this->reinit();
+
+        return (int) $store->getId();
+    }
+
+    protected function deleteStoreView(int $storeId): void
+    {
+        $registry = $this->om->get(\Magento\Framework\Registry::class);
+        $registry->unregister('isSecureArea');
+        $registry->register('isSecureArea', true);
+        $store = $this->om->create(\Magento\Store\Model\Store::class)->load($storeId);
+        $store->getResource()->delete($store);
+        $writer = $this->om->get(ConfigWriter::class);
+        $writer->getConnection()->delete($writer->getMainTable(), ['scope = ?' => 'stores', 'scope_id = ?' => $storeId]);
+        $this->reinit();
+    }
+
+    protected function reinit(): void
+    {
+        $this->om->get(ReinitableConfigInterface::class)->reinit();
+        $this->om->get(\Magento\Framework\App\Cache\TypeListInterface::class)->cleanType('config');
+        $this->om->get(\Magento\Store\Model\StoreManagerInterface::class)->reinitStores();
+    }
+
+    /**
      * Catalog changes are made in the admin, as in a real store (Magento 2.4.7 builds category URL rewrites of a
      * product saved elsewhere with errors).
      */

@@ -100,6 +100,36 @@ class Config
         return array_values($stores);
     }
 
+    /**
+     * Other languages of the catalog of a store view from catalogStores(): store views of the same project with
+     * another locale (the first one per locale). Their names, links, categories and attributes are translations.
+     *
+     * @return array<string, int> locale ("de_DE") => store view id
+     */
+    public function translationStores(int $mainStoreId): array
+    {
+        $project = $this->url($mainStoreId) . '|' . $this->secretKey($mainStoreId);
+        $languages = [$this->locale($mainStoreId) => $mainStoreId];
+
+        foreach ($this->storeManager->getStores() as $store) {
+            $id = (int) $store->getId();
+
+            if ($store->isActive() && $this->server($id) && $this->enabled('catalog', $id) && $this->url($id) . '|' . $this->secretKey($id) === $project) {
+                $languages[$this->locale($id)] ??= $id;
+            }
+        }
+
+        unset($languages[$this->locale($mainStoreId)]);
+
+        return $languages;
+    }
+
+    /** Locale of a store view (Stores → Configuration → General → Locale Options): "de_DE". */
+    public function locale(?int $storeId = null): string
+    {
+        return (string) $this->scopeConfig->getValue('general/locale/code', ScopeInterface::SCOPE_STORE, $storeId);
+    }
+
     private function value(string $path, ?int $storeId): mixed
     {
         return $this->scopeConfig->getValue('onetrace/' . $path, ScopeInterface::SCOPE_STORE, $storeId);
