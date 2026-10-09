@@ -78,7 +78,7 @@ bin/magento onetrace:sync-catalog     # uploads the whole catalog now
 
 ```bash
 tests/env/run.sh                                          # integration tests: Magento 2.4.8 in Docker
-MAGENTO_TAG=php83-fpm-magento2.4.7 tests/env/run.sh       # another version
+MAGENTO_TAG=php82-fpm-magento2.4.7-p10 tests/env/run.sh   # another version
 ```
 
 The tests run inside [ready Magento images](https://hub.docker.com/r/michielgerritsen/magento-project-community-edition) with the module installed from the working copy: orders go through the real quote submit, invoices, credit memos and newsletter subscriptions.

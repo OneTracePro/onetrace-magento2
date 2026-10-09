@@ -2,7 +2,7 @@
 # Integration tests in Docker: a ready Magento (michielgerritsen/magento-project-community-edition: MySQL,
 # Elasticsearch, PHP-FPM, nginx in one image) with this module installed from the working copy, PHPUnit inside.
 #   tests/env/run.sh                                         — Magento 2.4.8, PHP 8.4
-#   MAGENTO_TAG=php82-fpm-magento2.4.7-p1 tests/env/run.sh   — another version
+#   MAGENTO_TAG=php82-fpm-magento2.4.7-p10 tests/env/run.sh  — another version
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 TAG="${MAGENTO_TAG:-php84-fpm-magento2.4.8-p5}"

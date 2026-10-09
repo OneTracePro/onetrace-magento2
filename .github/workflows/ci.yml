@@ -5,6 +5,9 @@ on:
     branches: [main]
     tags: ['v*']
   pull_request:
+  schedule:
+    # Weekly: new Magento patches and Composer releases reach the matrix before users do.
+    - cron: '0 6 * * 1'
   workflow_dispatch:
 
 permissions:
@@ -18,11 +21,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { magento: '2.4.7', php: '8.3', tag: 'php83-fpm-magento2.4.7' }
-          - { magento: '2.4.8', php: '8.4', tag: 'php84-fpm-magento2.4.8-p5' }
+          - { magento: '2.4.7-p10', php: '8.2', tag: 'php82-fpm-magento2.4.7-p10' }
+          - { magento: '2.4.8-p5', php: '8.4', tag: 'php84-fpm-magento2.4.8-p5' }
+          - { magento: '2.4.9', php: '8.3', tag: 'php83-fpm-magento2.4.9' }
           - { magento: '2.4.9', php: '8.5', tag: 'php85-fpm-magento2.4.9' }
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Integration tests in a ready Magento image
         run: tests/env/run.sh
         env:
@@ -36,7 +40,7 @@ jobs:
     name: Magento coding standard
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
