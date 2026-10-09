@@ -2,6 +2,10 @@
 
 All notable changes are documented here. The project follows [Semantic Versioning](https://semver.org/).
 
+## 1.2.0 — 2026-10-09
+
+- Search redirects: the quick search results page of a query with a redirect rule (Site → Search of the platform, e.g. "delivery" → the delivery page) opens the rule's page. A short suggestion request is made before the page is built; later pages of the results and API errors keep the results page.
+
 ## 1.1.0 — 2026-10-09
 
 - Catalog languages: store views of one project (the same address and secret key) with another locale add translations to the catalog of the first store view — product names, links of that store view, category names and the values of visible attributes. Recommendations, widgets, search and emails show the visitor's language.

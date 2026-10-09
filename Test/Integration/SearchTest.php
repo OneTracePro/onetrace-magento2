@@ -126,4 +126,45 @@ final class SearchTest extends TestCase
 
         self::assertCount(1, $this->urls, 'Only the first search asked the platform.');
     }
+
+    /**
+     * The results page controller through the redirect plugin: the redirect URL, or null when the page is built.
+     *
+     * @param array<string, string> $params
+     */
+    private function resultsPage(array $params): ?string
+    {
+        $request = $this->om->get(\Magento\Framework\App\RequestInterface::class);
+        $request->setParams($params);
+        $controller = $this->om->create(\Magento\CatalogSearch\Controller\Result\Index::class);
+        $result = $this->om->create(\OneTrace\Connector\Plugin\SearchRedirect::class, ['request' => $request])->aroundExecute($controller, static fn () => null);
+
+        if (!$result instanceof \Magento\Framework\Controller\Result\Redirect) {
+            return null;
+        }
+
+        $response = $this->om->create(\Magento\Framework\App\Response\Http::class);
+        $result->renderResult($response);
+
+        return $response->getHeader('Location')->getFieldValue();
+    }
+
+    public function testOpensThePageOfARedirectRuleInsteadOfTheResults(): void
+    {
+        $this->respond(200, ['products' => [], 'categories' => [], 'queries' => [], 'redirect' => 'https://shop.example.com/delivery']);
+
+        self::assertSame('https://shop.example.com/delivery', $this->resultsPage(['q' => 'Delivery']));
+        self::assertStringContainsString('/api/v1/search/suggest?q=Delivery&limit=1&language=en_US', $this->urls[0]);
+        self::assertNull($this->resultsPage(['q' => 'Delivery', 'p' => '2']), 'Later pages are not asked.');
+        self::assertCount(1, $this->urls);
+
+        $this->respond(200, ['products' => [], 'categories' => [], 'queries' => [], 'redirect' => 'javascript:alert(1)']);
+        self::assertNull($this->resultsPage(['q' => 'delivery']));
+
+        $this->respond(200, ['products' => [], 'categories' => [], 'queries' => [], 'redirect' => null]);
+        self::assertNull($this->resultsPage(['q' => 'dress']));
+
+        $this->respond(503, ['message' => 'down']);
+        self::assertNull($this->resultsPage(['q' => 'delivery']), 'Errors keep the results page.');
+    }
 }

@@ -57,6 +57,7 @@ Turn on **Product search** in the settings (the plan of the project must include
 
 - The quick search results page keeps your theme and layered navigation, but its products, their order and their number come from OneTrace: word forms, typos, a query typed in the wrong keyboard layout, the visitor's interests. Sorting by price and the category and price filters go to the platform.
 - The search box shows suggestions of the tracker while typing: popular queries, categories and products with pictures and prices.
+- A query with a redirect rule (Site → Search of the platform, e.g. "delivery" → the delivery page) opens the rule's page instead of the results. The full page cache does not store redirects, but a popular query cached before its rule was added shows the cached results until the cache is refreshed.
 - Filters by other attributes, sorting by name and any error of the platform keep Magento's own search. The layered navigation counts come from Magento's search.
 
 ## Privacy
