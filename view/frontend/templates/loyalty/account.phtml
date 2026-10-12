@@ -1,0 +1,49 @@
+<?php
+/** @var \OneTrace\Connector\Block\Loyalty\Account $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$loyalty = $block->loyalty();
+?>
+<?php if ($loyalty === false): ?>
+    <div class="message info"><span><?= $escaper->escapeHtml(__('Bonus points are not available right now. Please try again later.')) ?></span></div>
+<?php elseif (empty($loyalty['account']['member'])): ?>
+    <p><?= $escaper->escapeHtml(__('Join the loyalty program: collect points for orders and pay for part of your next orders with them.')) ?></p>
+    <form method="post" action="<?= $escaper->escapeUrl($block->joinUrl()) ?>">
+        <?= $block->getBlockHtml('formkey') ?>
+        <button type="submit" class="action primary"><span><?= $escaper->escapeHtml(__('Join the program')) ?></span></button>
+    </form>
+<?php else: ?>
+    <?php $account = $loyalty['account']; ?>
+    <div class="table-wrapper onetrace-loyalty-account">
+        <table class="data table">
+            <tbody>
+                <tr><th scope="row"><?= $escaper->escapeHtml(__('Available')) ?></th><td><?= (int) $account['balance'] ?></td></tr>
+                <tr><th scope="row"><?= $escaper->escapeHtml(__('Pending (available after the return period)')) ?></th><td><?= (int) $account['pending'] ?></td></tr>
+                <?php if (!empty($account['tier'])): ?>
+                    <tr><th scope="row"><?= $escaper->escapeHtml(__('Tier')) ?></th><td><?= $escaper->escapeHtml((string) $account['tier']) ?></td></tr>
+                <?php endif; ?>
+                <?php if ((int) ($account['expiring'] ?? 0) > 0 && !empty($account['expires_at'])): ?>
+                    <tr><th scope="row"><?= $escaper->escapeHtml(__('Expiring soon')) ?></th><td><?= $escaper->escapeHtml(__('%1 (until %2)', (int) $account['expiring'], $block->date((string) $account['expires_at']))) ?></td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+    <?php if ($loyalty['operations'] !== []): ?>
+        <div class="block"><div class="block-title"><strong><?= $escaper->escapeHtml(__('History')) ?></strong></div></div>
+        <div class="table-wrapper onetrace-loyalty-history">
+            <table class="data table">
+                <thead><tr><th scope="col"><?= $escaper->escapeHtml(__('Date')) ?></th><th scope="col"><?= $escaper->escapeHtml(__('Operation')) ?></th><th scope="col"><?= $escaper->escapeHtml(__('Points')) ?></th></tr></thead>
+                <tbody>
+                    <?php foreach ($loyalty['operations'] as $operation): ?>
+                        <?php $points = (int) ($operation['points'] ?? 0); ?>
+                        <?php $details = array_filter([(string) ($operation['reason'] ?? ''), (string) ($operation['rule'] ?? ''), $block->reference((string) ($operation['reference'] ?? ''))]); ?>
+                        <tr>
+                            <td><?= $escaper->escapeHtml($block->date((string) ($operation['created_at'] ?? ''))) ?></td>
+                            <td><?= $escaper->escapeHtml($block->operation((string) ($operation['type'] ?? ''))) ?><?php if ($details !== []): ?><br><small><?= $escaper->escapeHtml(implode(' · ', $details)) ?></small><?php endif; ?></td>
+                            <td><?= $escaper->escapeHtml(($points > 0 ? '+' : '') . $points) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif; ?>
+<?php endif; ?>

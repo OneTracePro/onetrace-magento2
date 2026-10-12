@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Sales:etc/sales.xsd">
+    <!-- Bonus points: after the tax (points do not change the tax), before the grand total. -->
+    <section name="quote">
+        <group name="totals">
+            <item name="onetrace_loyalty" instance="OneTrace\Connector\Model\Total\Quote\Loyalty" sort_order="510"/>
+        </group>
+    </section>
+    <section name="order_invoice">
+        <group name="totals">
+            <item name="onetrace_loyalty" instance="OneTrace\Connector\Model\Total\Invoice\Loyalty" sort_order="510"/>
+        </group>
+    </section>
+    <section name="order_creditmemo">
+        <group name="totals">
+            <item name="onetrace_loyalty" instance="OneTrace\Connector\Model\Total\Creditmemo\Loyalty" sort_order="510"/>
+        </group>
+    </section>
+</config>

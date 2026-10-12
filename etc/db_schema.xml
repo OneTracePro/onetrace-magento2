@@ -32,4 +32,35 @@
         </constraint>
         <constraint xsi:type="foreign" referenceId="ONETRACE_ORDER_ORDER_ID_SALES_ORDER_ENTITY_ID" table="onetrace_order" column="order_id" referenceTable="sales_order" referenceColumn="entity_id" onDelete="CASCADE"/>
     </table>
+    <!-- Bonus points of the OneTrace loyalty program: the hold of the cart, the discount in the totals of the quote,
+         order, invoice and credit memo, the confirmation of the order. -->
+    <table name="quote" resource="checkout">
+        <column xsi:type="int" name="onetrace_loyalty_points" unsigned="true" nullable="false" default="0" comment="OneTrace: held bonus points"/>
+        <column xsi:type="decimal" name="onetrace_loyalty_discount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="OneTrace: discount of the held points"/>
+        <column xsi:type="decimal" name="base_onetrace_loyalty_discount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="OneTrace: discount of the held points, base currency"/>
+        <column xsi:type="varchar" name="onetrace_loyalty_redemption" nullable="true" length="64" comment="OneTrace: redemption id"/>
+        <column xsi:type="decimal" name="onetrace_loyalty_basis" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="OneTrace: cart amount at the hold"/>
+        <column xsi:type="decimal" name="onetrace_loyalty_ratio" scale="4" precision="12" unsigned="false" nullable="false" default="0" comment="OneTrace: share of the cart payable with points"/>
+        <column xsi:type="int" name="onetrace_loyalty_held_until" unsigned="true" nullable="false" default="0" comment="OneTrace: hold expiry, unix time"/>
+    </table>
+    <!-- The total of the address (like discount_amount): reading the cart totals takes "{code}_amount" from here. -->
+    <table name="quote_address" resource="checkout">
+        <column xsi:type="decimal" name="onetrace_loyalty_amount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="OneTrace: bonus points total (negative)"/>
+        <column xsi:type="decimal" name="base_onetrace_loyalty_amount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="OneTrace: bonus points total (negative), base currency"/>
+    </table>
+    <table name="sales_order" resource="sales">
+        <column xsi:type="int" name="onetrace_loyalty_points" unsigned="true" nullable="false" default="0" comment="OneTrace: held bonus points"/>
+        <column xsi:type="decimal" name="onetrace_loyalty_discount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="OneTrace: discount of the held points"/>
+        <column xsi:type="decimal" name="base_onetrace_loyalty_discount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="OneTrace: discount of the held points, base currency"/>
+        <column xsi:type="varchar" name="onetrace_loyalty_redemption" nullable="true" length="64" comment="OneTrace: redemption id"/>
+        <column xsi:type="datetime" name="onetrace_loyalty_confirmed_at" nullable="true" comment="OneTrace: redemption confirmed"/>
+    </table>
+    <table name="sales_invoice" resource="sales">
+        <column xsi:type="decimal" name="onetrace_loyalty_discount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="OneTrace: bonus points discount"/>
+        <column xsi:type="decimal" name="base_onetrace_loyalty_discount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="OneTrace: bonus points discount, base currency"/>
+    </table>
+    <table name="sales_creditmemo" resource="sales">
+        <column xsi:type="decimal" name="onetrace_loyalty_discount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="OneTrace: bonus points discount"/>
+        <column xsi:type="decimal" name="base_onetrace_loyalty_discount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="OneTrace: bonus points discount, base currency"/>
+    </table>
 </schema>

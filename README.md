@@ -60,6 +60,16 @@ Turn on **Product search** in the settings (the plan of the project must include
 - A query with a redirect rule (Site → Search of the platform, e.g. "delivery" → the delivery page) opens the rule's page instead of the results. The full page cache does not store redirects, but a popular query cached before its rule was added shows the cached results until the cache is refreshed.
 - Filters by other attributes, sorting by name and any error of the platform keep Magento's own search. The layered navigation counts come from Magento's search.
 
+## Bonus points
+
+Turn on **Stores → Configuration → OneTrace → What to send → Bonus points**; the program itself (earning, tiers, the share of an order payable with points) is set up in the **Loyalty** section of the platform, and the secret key needs the `loyalty.read` and `loyalty.write` permissions.
+
+- **Cart and checkout:** a signed-in customer sees the balance, how many points the cart can take and the points for the order in the cart summary and in the checkout order summary, enters the points and clicks "Use points". The points are held on the platform for 30 minutes; the discount is the `onetrace_loyalty` total (a row of the totals of the cart, order, invoice, credit memo, order pages and emails). Guests see a hint to sign in.
+- **Order:** right before the order is placed a changed cart or a hold about to expire is held again within the allowed share; the order confirms the points with its increment id (cron retries if the platform is unavailable). Cancelled and refunded orders return the points on the platform.
+- **My Account → Bonus points:** the balance, points waiting for the return period, the tier, points expiring soon and the latest operations; "Join the program" for programs with explicit enrollment.
+
+Customers are found on the platform by `user_id` (the customer id), like in the order events.
+
 ## Privacy
 
 - With **Cookie Restriction Mode** on, the tracker loads after the visitor allows cookies (can be turned off in the settings).

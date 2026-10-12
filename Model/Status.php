@@ -42,10 +42,12 @@ class Status
             try {
                 $answer = $this->connection->client($storeId, $key)->checkKey($key);
                 $missing = $key === 'secret' && !in_array('products.write', $answer['scopes'], true) && $this->config->enabled('catalog', $storeId);
+                $loyalty = $key === 'secret' && $this->config->enabled('loyalty', $storeId) && array_diff(['loyalty.read', 'loyalty.write'], $answer['scopes']) !== [];
                 $results[] = [
-                    'ok' => $answer['type'] === $key && !$missing,
+                    'ok' => $answer['type'] === $key && !$missing && !$loyalty,
                     'message' => (string) __('%1: project "%2".', $label, (string) ($answer['project']['name'] ?? ''))
-                        . ($missing ? ' ' . __('The key has no products.write permission: the catalog will not be uploaded.') : ''),
+                        . ($missing ? ' ' . __('The key has no products.write permission: the catalog will not be uploaded.') : '')
+                        . ($loyalty ? ' ' . __('The key has no loyalty.read and loyalty.write permissions: bonus points will not work.') : ''),
                 ];
             } catch (\Throwable $error) {
                 $results[] = ['ok' => false, 'message' => $label . ': ' . $error->getMessage()];

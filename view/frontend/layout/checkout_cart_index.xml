@@ -8,5 +8,25 @@
                 </arguments>
             </block>
         </referenceContainer>
+        <!-- Bonus points: the row of the totals and the points field under them. -->
+        <referenceBlock name="checkout.cart.totals">
+            <arguments>
+                <argument name="jsLayout" xsi:type="array">
+                    <item name="components" xsi:type="array">
+                        <item name="block-totals" xsi:type="array">
+                            <item name="children" xsi:type="array">
+                                <item name="onetrace_loyalty" xsi:type="array">
+                                    <item name="component" xsi:type="string">OneTrace_Connector/js/view/summary/loyalty</item>
+                                    <item name="sortOrder" xsi:type="string">75</item>
+                                </item>
+                            </item>
+                        </item>
+                    </item>
+                </argument>
+            </arguments>
+        </referenceBlock>
+        <referenceContainer name="cart.summary">
+            <block class="Magento\Framework\View\Element\Template" name="onetrace.loyalty.cart" template="OneTrace_Connector::loyalty/field.phtml" after="checkout.cart.totals.container" ifconfig="onetrace/parts/loyalty"/>
+        </referenceContainer>
     </body>
 </page>

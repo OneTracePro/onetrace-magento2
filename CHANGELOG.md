@@ -2,6 +2,13 @@
 
 All notable changes are documented here. The project follows [Semantic Versioning](https://semver.org/).
 
+## 1.3.0 — 2026-10-13
+
+- Bonus points of the OneTrace loyalty program ("Bonus points" setting, off by default): signed-in customers see their balance and pay for part of the order with points in the cart summary and in the checkout order summary. The points are held on the platform for 30 minutes and stored with the quote; the discount is the `onetrace_loyalty` total of the quote, order, invoice and credit memo (shown on order pages and in emails). Before the order is placed a changed cart or a hold about to expire is held again within the allowed share; the order confirms the points with its increment id, and cron retries if the platform is unavailable. Cancelled and refunded orders return the points on the platform.
+- My Account → Bonus points: the balance, points waiting for the return period, the tier, points expiring soon and the latest operations; joining the program.
+- The connection test checks the loyalty.read and loyalty.write permissions of the secret key.
+- Requires onetrace-php 1.6.
+
 ## 1.2.0 — 2026-10-09
 
 - Search redirects: the quick search results page of a query with a redirect rule (Site → Search of the platform, e.g. "delivery" → the delivery page) opens the rule's page. A short suggestion request is made before the page is built; later pages of the results and API errors keep the results page.

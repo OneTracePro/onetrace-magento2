@@ -1,0 +1,70 @@
+{
+    "onetrace_queue": {
+        "column": {
+            "id": true,
+            "store_id": true,
+            "kind": true,
+            "item_key": true,
+            "payload": true,
+            "attempts": true,
+            "available_at": true,
+            "last_error": true,
+            "created_at": true
+        },
+        "index": {
+            "ONETRACE_QUEUE_KIND_AVAILABLE_AT": true,
+            "ONETRACE_QUEUE_STORE_ID_ITEM_KEY": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "onetrace_order": {
+        "column": {
+            "order_id": true,
+            "anonymous_id": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ONETRACE_ORDER_ORDER_ID_SALES_ORDER_ENTITY_ID": true
+        }
+    },
+    "quote": {
+        "column": {
+            "onetrace_loyalty_points": true,
+            "onetrace_loyalty_discount": true,
+            "base_onetrace_loyalty_discount": true,
+            "onetrace_loyalty_redemption": true,
+            "onetrace_loyalty_basis": true,
+            "onetrace_loyalty_ratio": true,
+            "onetrace_loyalty_held_until": true
+        }
+    },
+    "quote_address": {
+        "column": {
+            "onetrace_loyalty_amount": true,
+            "base_onetrace_loyalty_amount": true
+        }
+    },
+    "sales_order": {
+        "column": {
+            "onetrace_loyalty_points": true,
+            "onetrace_loyalty_discount": true,
+            "base_onetrace_loyalty_discount": true,
+            "onetrace_loyalty_redemption": true,
+            "onetrace_loyalty_confirmed_at": true
+        }
+    },
+    "sales_invoice": {
+        "column": {
+            "onetrace_loyalty_discount": true,
+            "base_onetrace_loyalty_discount": true
+        }
+    },
+    "sales_creditmemo": {
+        "column": {
+            "onetrace_loyalty_discount": true,
+            "base_onetrace_loyalty_discount": true
+        }
+    }
+}

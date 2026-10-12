@@ -40,4 +40,8 @@
             </argument>
         </arguments>
     </type>
+    <!-- Bonus points: the hold is checked right before the order is placed. -->
+    <type name="Magento\Quote\Api\CartManagementInterface">
+        <plugin name="onetrace_prepare_loyalty" type="OneTrace\Connector\Plugin\PrepareLoyalty"/>
+    </type>
 </config>
