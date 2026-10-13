@@ -80,3 +80,20 @@ Cart,Cart
 "Welcome to the loyalty program!","Welcome to the loyalty program!"
 "Your points: %1 (%2).","Your points: %1 (%2)."
 "The loyalty program of the platform: signed-in customers pay for part of the order with points in the cart and at checkout and see their points in My Account → Bonus points. The secret key needs the loyalty.read and loyalty.write permissions.","The loyalty program of the platform: signed-in customers pay for part of the order with points in the cart and at checkout and see their points in My Account → Bonus points. The secret key needs the loyalty.read and loyalty.write permissions."
+Friend's code field,Friend's code field
+"The ""Friend's code"" field in the registration form. Without it the code of a referral link (?ref=) still counts: the tracker keeps it in a cookie, and the friend gets the welcome reward on registration.","The ""Friend's code"" field in the registration form. Without it the code of a referral link (?ref=) still counts: the tracker keeps it in a cookie, and the friend gets the welcome reward on registration."
+Promo codes,Promo codes
+"Unique codes of OneTrace promo code pools become coupons of cart price rules every 5 minutes, one use each with the expiry of the code. The rule needs the ""Specific Coupon"" type with ""Use Auto Generation"".","Unique codes of OneTrace promo code pools become coupons of cart price rules every 5 minutes, one use each with the expiry of the code. The rule needs the ""Specific Coupon"" type with ""Use Auto Generation""."
+Pools and cart price rules,Pools and cart price rules
+"One per line: pool key = rule ID, e.g. welcome = 12. The secret key needs the promo.read permission.","One per line: pool key = rule ID, e.g. welcome = 12. The secret key needs the promo.read permission."
+The key has no promo.read permission: promo codes will not become coupons.,The key has no promo.read permission: promo codes will not become coupons.
+Friend's code,Friend's code
+Joined by invitation,Joined by invitation
+A friend placed a first order,A friend placed a first order
+Invite friends,Invite friends
+"Share your link: a friend gets a welcome gift, and you get points for their first order.","Share your link: a friend gets a welcome gift, and you get points for their first order."
+Copied,Copied
+Copy,Copy
+"Friends who came: %1, placed an order: %2, points for them: %3","Friends who came: %1, placed an order: %2, points for them: %3"
+Your promo codes,Your promo codes
+valid until %1,valid until %1

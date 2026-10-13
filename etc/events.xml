@@ -18,6 +18,7 @@
     </event>
     <event name="customer_register_success">
         <observer name="onetrace_customer_registered" instance="OneTrace\Connector\Observer\CustomerChanged"/>
+        <observer name="onetrace_referral_registered" instance="OneTrace\Connector\Observer\ReferralRegistered"/>
     </event>
     <event name="customer_save_after_data_object">
         <observer name="onetrace_customer_saved" instance="OneTrace\Connector\Observer\CustomerChanged"/>

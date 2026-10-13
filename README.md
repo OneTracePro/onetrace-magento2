@@ -66,9 +66,20 @@ Turn on **Stores → Configuration → OneTrace → What to send → Bonus point
 
 - **Cart and checkout:** a signed-in customer sees the balance, how many points the cart can take and the points for the order in the cart summary and in the checkout order summary, enters the points and clicks "Use points". The points are held on the platform for 30 minutes; the discount is the `onetrace_loyalty` total (a row of the totals of the cart, order, invoice, credit memo, order pages and emails). Guests see a hint to sign in.
 - **Order:** right before the order is placed a changed cart or a hold about to expire is held again within the allowed share; the order confirms the points with its increment id (cron retries if the platform is unavailable). Cancelled and refunded orders return the points on the platform.
-- **My Account → Bonus points:** the balance, points waiting for the return period, the tier, points expiring soon and the latest operations; "Join the program" for programs with explicit enrollment.
+- **My Account → Bonus points:** the balance, points waiting for the return period, the tier, points expiring soon and the latest operations; "Join the program" for programs with explicit enrollment; the referral link with a copy button and the friends who came by it; active promo codes of the customer.
+- **Referrals:** turn on referrals in the platform (Loyalty → Referrals). On registration the friend's code — from a `?ref=` link (the tracker keeps it in the `cdp_ref` cookie for 30 days) or from the optional "Friend's code" field (**What to send → Friend's code field**) — goes to the platform from cron, and the friend gets the welcome reward; the member gets points for the friend's first order.
 
 Customers are found on the platform by `user_id` (the customer id), like in the order events.
+
+## Promo codes
+
+Pools of promo codes are set up in the **Promo codes** section of the platform; the discount is a cart price rule of the store. Create a rule (**Marketing → Cart Price Rules**) with the **Specific Coupon** type and **Use Auto Generation**, and bind it to the pool in **Stores → Configuration → OneTrace → Promo codes**, one per line:
+
+```
+welcome = 12
+```
+
+Every 5 minutes (cron `onetrace_promo_sync`) new and changed unique codes of the pool become coupons of the rule, one use each with the expiry of the code. Coupons of other rules with the same code are not touched; pools with one shared code are not synced — add that coupon to a rule yourself. The order events carry the coupon, so the platform counts the use. The secret key needs `promo.read`.
 
 ## Privacy
 

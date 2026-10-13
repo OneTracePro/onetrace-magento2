@@ -130,6 +130,24 @@ class Config
         return (string) $this->scopeConfig->getValue('general/locale/code', ScopeInterface::SCOPE_STORE, $storeId);
     }
 
+    /**
+     * Promo code pools bound to cart price rules (onetrace/promo/pools: "pool_key = rule id" per line).
+     *
+     * @return array<string, int> pool key → rule id
+     */
+    public function promoPools(): array
+    {
+        $pools = [];
+
+        foreach (preg_split('/\R/', (string) $this->scopeConfig->getValue('onetrace/promo/pools')) ?: [] as $line) {
+            if (preg_match('/^\s*([a-z0-9_]{1,64})\s*=\s*(\d+)\s*$/', $line, $match) === 1) {
+                $pools[$match[1]] = (int) $match[2];
+            }
+        }
+
+        return $pools;
+    }
+
     private function value(string $path, ?int $storeId): mixed
     {
         return $this->scopeConfig->getValue('onetrace/' . $path, ScopeInterface::SCOPE_STORE, $storeId);

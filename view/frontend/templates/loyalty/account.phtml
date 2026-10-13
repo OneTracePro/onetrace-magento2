@@ -27,6 +27,33 @@ $loyalty = $block->loyalty();
             </tbody>
         </table>
     </div>
+    <?php if (!empty($account['referral_url'])): ?>
+        <div class="block onetrace-referral">
+            <div class="block-title"><strong><?= $escaper->escapeHtml(__('Invite friends')) ?></strong></div>
+            <div class="block-content">
+                <p><?= $escaper->escapeHtml(__('Share your link: a friend gets a welcome gift, and you get points for their first order.')) ?></p>
+                <p>
+                    <input type="text" class="input-text" readonly value="<?= $escaper->escapeHtmlAttr((string) $account['referral_url']) ?>" style="max-width:28em" onclick="this.select()">
+                    <button type="button" class="action secondary" data-done="<?= $escaper->escapeHtmlAttr(__('Copied')) ?>" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.previousElementSibling.value);this.textContent=this.dataset.done"><span><?= $escaper->escapeHtml(__('Copy')) ?></span></button>
+                </p>
+                <?php $referrals = (array) ($account['referrals'] ?? []); ?>
+                <?php if ((int) ($referrals['invited'] ?? 0) > 0): ?>
+                    <p><small><?= $escaper->escapeHtml(__('Friends who came: %1, placed an order: %2, points for them: %3', (int) $referrals['invited'], (int) ($referrals['rewarded'] ?? 0), (int) ($referrals['points'] ?? 0))) ?></small></p>
+                <?php endif; ?>
+            </div>
+        </div>
+    <?php endif; ?>
+    <?php $promoCodes = $block->promoCodes(); ?>
+    <?php if ($promoCodes !== []): ?>
+        <div class="block onetrace-promo-codes">
+            <div class="block-title"><strong><?= $escaper->escapeHtml(__('Your promo codes')) ?></strong></div>
+            <ul class="block-content">
+                <?php foreach ($promoCodes as $promoCode): ?>
+                    <li><code><?= $escaper->escapeHtml($promoCode['code']) ?></code><?php if ($promoCode['expires_at'] !== null): ?> <small><?= $escaper->escapeHtml(__('valid until %1', $block->date($promoCode['expires_at']))) ?></small><?php endif; ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
     <?php if ($loyalty['operations'] !== []): ?>
         <div class="block"><div class="block-title"><strong><?= $escaper->escapeHtml(__('History')) ?></strong></div></div>
         <div class="table-wrapper onetrace-loyalty-history">
@@ -35,7 +62,7 @@ $loyalty = $block->loyalty();
                 <tbody>
                     <?php foreach ($loyalty['operations'] as $operation): ?>
                         <?php $points = (int) ($operation['points'] ?? 0); ?>
-                        <?php $details = array_filter([(string) ($operation['reason'] ?? ''), (string) ($operation['rule'] ?? ''), $block->reference((string) ($operation['reference'] ?? ''))]); ?>
+                        <?php $details = array_filter([(string) ($operation['reason'] ?? ''), (string) ($operation['rule'] ?? ''), $block->referralKind((string) ($operation['referral'] ?? '')), $block->reference((string) ($operation['reference'] ?? ''))]); ?>
                         <tr>
                             <td><?= $escaper->escapeHtml($block->date((string) ($operation['created_at'] ?? ''))) ?></td>
                             <td><?= $escaper->escapeHtml($block->operation((string) ($operation['type'] ?? ''))) ?><?php if ($details !== []): ?><br><small><?= $escaper->escapeHtml(implode(' · ', $details)) ?></small><?php endif; ?></td>

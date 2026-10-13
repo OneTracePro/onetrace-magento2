@@ -69,10 +69,42 @@ class Account extends Template
         return (string) ($labels[$type] ?? $type);
     }
 
-    /** The reference of a hold is the cart of the store — not useful to the customer. */
+    /** References of holds (the cart of the store) and of referral rewards are internal. */
     public function reference(string $reference): string
     {
-        return str_starts_with($reference, 'm2:') ? '' : $reference;
+        return preg_match('/^(m2|referral):/', $reference) === 1 ? '' : $reference;
+    }
+
+    /** A referral reward in the history: joined by invitation or a friend's first order. */
+    public function referralKind(string $kind): string
+    {
+        return (string) (['friend' => __('Joined by invitation'), 'referrer' => __('A friend placed a first order')][$kind] ?? '');
+    }
+
+    /**
+     * Active promo codes issued to the customer; empty without codes or without the promo.read permission.
+     *
+     * @return list<array{code: string, expires_at: string|null}>
+     */
+    public function promoCodes(): array
+    {
+        $profile = Identity::userId((string) $this->customers->getCustomerId());
+
+        try {
+            $response = $this->connection->client((int) $this->_storeManager->getStore()->getId())->promo()->profileCodes($profile['type'], $profile['value']);
+        } catch (\Throwable $error) {
+            return [];
+        }
+
+        $codes = [];
+
+        foreach (\is_array($response['data'] ?? null) ? $response['data'] : [] as $code) {
+            if (\is_array($code) && !empty($code['active']) && \is_string($code['code'] ?? null)) {
+                $codes[] = ['code' => $code['code'], 'expires_at' => \is_string($code['expires_at'] ?? null) ? $code['expires_at'] : null];
+            }
+        }
+
+        return $codes;
     }
 
     public function date(string $iso): string

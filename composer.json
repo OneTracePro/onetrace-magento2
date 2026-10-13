@@ -19,7 +19,7 @@
         "magento/module-newsletter": "^100.4",
         "magento/module-sales": "^103.0",
         "magento/module-store": "^101.1",
-        "onetracepro/onetrace-php": "^1.6"
+        "onetracepro/onetrace-php": "^1.7"
     },
     "autoload": {
         "files": ["registration.php"],

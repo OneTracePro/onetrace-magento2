@@ -16,6 +16,7 @@
                 <newsletter>1</newsletter>
                 <search>0</search>
                 <loyalty>0</loyalty>
+                <referral_field>0</referral_field>
             </parts>
             <consent>
                 <topic/>
@@ -25,6 +26,9 @@
                 <cart/>
                 <push>0</push>
             </widgets>
+            <promo>
+                <pools/>
+            </promo>
         </onetrace>
     </default>
 </config>

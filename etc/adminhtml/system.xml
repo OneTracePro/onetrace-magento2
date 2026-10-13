@@ -67,6 +67,12 @@
                     <comment>The loyalty program of the platform: signed-in customers pay for part of the order with points in the cart and at checkout and see their points in My Account → Bonus points. The secret key needs the loyalty.read and loyalty.write permissions.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="referral_field" translate="label comment" type="select" sortOrder="85" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Friend's code field</label>
+                    <comment>The "Friend's code" field in the registration form. Without it the code of a referral link (?ref=) still counts: the tracker keeps it in a cookie, and the friend gets the welcome reward on registration.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends><field id="loyalty">1</field></depends>
+                </field>
                 <field id="search" translate="label comment" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Product search</label>
                     <comment>Search results and suggestions while typing from OneTrace: word forms, typos, the wrong keyboard layout and the visitor's interests. On any error the store search runs as usual. The plan of the project must include product search.</comment>
@@ -93,6 +99,14 @@
                     <label>Web Push</label>
                     <comment>Serve /cdp-sw.js from the store root.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+            <group id="promo" translate="label comment" sortOrder="50" showInDefault="1">
+                <label>Promo codes</label>
+                <comment>Unique codes of OneTrace promo code pools become coupons of cart price rules every 5 minutes, one use each with the expiry of the code. The rule needs the "Specific Coupon" type with "Use Auto Generation".</comment>
+                <field id="pools" translate="label comment" type="textarea" sortOrder="10" showInDefault="1">
+                    <label>Pools and cart price rules</label>
+                    <comment>One per line: pool key = rule ID, e.g. welcome = 12. The secret key needs the promo.read permission.</comment>
                 </field>
             </group>
         </section>

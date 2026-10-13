@@ -1,0 +1,10 @@
+<?php
+/** @var \OneTrace\Connector\Block\Loyalty\ReferralField $block */
+/** @var \Magento\Framework\Escaper $escaper */
+?>
+<div class="field onetrace-referral-code">
+    <label for="<?= $escaper->escapeHtmlAttr($block->name()) ?>" class="label"><span><?= $escaper->escapeHtml(__("Friend's code")) ?></span></label>
+    <div class="control">
+        <input type="text" name="<?= $escaper->escapeHtmlAttr($block->name()) ?>" id="<?= $escaper->escapeHtmlAttr($block->name()) ?>" value="<?= $escaper->escapeHtmlAttr($block->value()) ?>" maxlength="16" autocomplete="off" class="input-text">
+    </div>
+</div>

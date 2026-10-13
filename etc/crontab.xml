@@ -7,6 +7,12 @@
         <job name="onetrace_loyalty_confirm" instance="OneTrace\Connector\Cron\LoyaltyConfirm" method="execute">
             <schedule>* * * * *</schedule>
         </job>
+        <job name="onetrace_promo_sync" instance="OneTrace\Connector\Cron\PromoSync" method="execute">
+            <schedule>*/5 * * * *</schedule>
+        </job>
+        <job name="onetrace_referrals" instance="OneTrace\Connector\Cron\Referrals" method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
         <job name="onetrace_daily_catalog" instance="OneTrace\Connector\Cron\DailyCatalog" method="execute">
             <schedule>17 3 * * *</schedule>
         </job>

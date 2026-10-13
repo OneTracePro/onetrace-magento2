@@ -80,3 +80,20 @@
 "Welcome to the loyalty program!","Добро пожаловать в программу лояльности!"
 "Your points: %1 (%2).","Ваши баллы: %1 (%2)."
 "The loyalty program of the platform: signed-in customers pay for part of the order with points in the cart and at checkout and see their points in My Account → Bonus points. The secret key needs the loyalty.read and loyalty.write permissions.","Программа лояльности платформы: вошедшие покупатели оплачивают часть заказа баллами в корзине и при оформлении и видят баллы в «Мой аккаунт → Бонусные баллы». Секретному ключу нужны права loyalty.read и loyalty.write."
+Friend's code field,Поле «Код друга»
+"The ""Friend's code"" field in the registration form. Without it the code of a referral link (?ref=) still counts: the tracker keeps it in a cookie, and the friend gets the welcome reward on registration.","Поле «Код друга» в форме регистрации. Без него код из ссылки приглашения (?ref=) всё равно засчитывается: трекер сохраняет его в cookie, и друг получает подарок при регистрации."
+Promo codes,Промокоды
+"Unique codes of OneTrace promo code pools become coupons of cart price rules every 5 minutes, one use each with the expiry of the code. The rule needs the ""Specific Coupon"" type with ""Use Auto Generation"".","Уникальные коды пулов OneTrace каждые 5 минут становятся купонами правил корзины — на одно использование, со сроком кода. Правилу нужен тип «Specific Coupon» с включённым «Use Auto Generation»."
+Pools and cart price rules,Пулы и правила корзины
+"One per line: pool key = rule ID, e.g. welcome = 12. The secret key needs the promo.read permission.","По одному в строке: ключ пула = ID правила, например welcome = 12. Секретному ключу нужно право promo.read."
+The key has no promo.read permission: promo codes will not become coupons.,У ключа нет права promo.read: промокоды не станут купонами.
+Friend's code,Код друга
+Joined by invitation,Вступление по приглашению
+A friend placed a first order,Друг сделал первый заказ
+Invite friends,Пригласите друзей
+"Share your link: a friend gets a welcome gift, and you get points for their first order.","Поделитесь ссылкой: друг получит приветственный подарок, а вы — баллы за его первый заказ."
+Copied,Скопировано
+Copy,Скопировать
+"Friends who came: %1, placed an order: %2, points for them: %3","Пришло друзей: %1, сделали заказ: %2, баллов за них: %3"
+Your promo codes,Ваши промокоды
+valid until %1,действует до %1
