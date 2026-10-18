@@ -24,9 +24,9 @@ Tracker,Tracker
 Orders,Orders
 "Placed, paid (invoiced), cancelled and refunded orders with the customer data.","Placed, paid (invoiced), cancelled and refunded orders with the customer data."
 Cart,Cart
-"Adding to and removing from the cart, opening the checkout — for abandoned cart journeys.","Adding to and removing from the cart, opening the checkout — for abandoned cart journeys."
+"Adding to and removing from the cart and the wishlist, opening the checkout — for abandoned cart, price drop and back in stock journeys.","Adding to and removing from the cart and the wishlist, opening the checkout — for abandoned cart, price drop and back in stock journeys."
 "Product catalog","Product catalog"
-"Products and categories for recommendations and emails, updated when products change and daily.","Products and categories for recommendations and emails, updated when products change and daily."
+"Products with their stock and categories for recommendations and emails, updated when products or their stock change and daily.","Products with their stock and categories for recommendations and emails, updated when products or their stock change and daily."
 "Newsletter subscriptions","Newsletter subscriptions"
 "Subscribing and unsubscribing in the store (registration, account, footer form) become consents in OneTrace.","Subscribing and unsubscribing in the store (registration, account, footer form) become consents in OneTrace."
 "Newsletter consent","Newsletter consent"
@@ -97,3 +97,5 @@ Copy,Copy
 "Friends who came: %1, placed an order: %2, points for them: %3","Friends who came: %1, placed an order: %2, points for them: %3"
 Your promo codes,Your promo codes
 valid until %1,valid until %1
+"Show the “Notify when available” form","Show the “Notify when available” form"
+"On the page of a product that cannot be bought — the form of the “Notify when available” kind from Site → Forms of the platform, drawn by the tracker; Magento's own “Notify me when this product is in stock” link is hidden then. A journey with the Catalog → “back in stock” trigger sends the notification.","On the page of a product that cannot be bought — the form of the “Notify when available” kind from Site → Forms of the platform, drawn by the tracker; Magento's own “Notify me when this product is in stock” link is hidden then. A journey with the Catalog → “back in stock” trigger sends the notification."

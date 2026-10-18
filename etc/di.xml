@@ -44,4 +44,17 @@
     <type name="Magento\Quote\Api\CartManagementInterface">
         <plugin name="onetrace_prepare_loyalty" type="OneTrace\Connector\Plugin\PrepareLoyalty"/>
     </type>
+    <!-- Wishlist events also come from the admin, GraphQL and cron: the customer session only on the storefront. -->
+    <type name="OneTrace\Connector\Model\Wishlist">
+        <arguments>
+            <argument name="session" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
+        </arguments>
+    </type>
+    <!-- Inventory (MSI): changed source items change the salable quantity of the catalog. -->
+    <type name="Magento\InventoryApi\Api\SourceItemsSaveInterface">
+        <plugin name="onetrace_source_items" type="OneTrace\Connector\Plugin\SourceItemsChanged"/>
+    </type>
+    <type name="Magento\InventoryApi\Api\SourceItemsDeleteInterface">
+        <plugin name="onetrace_source_items" type="OneTrace\Connector\Plugin\SourceItemsChanged"/>
+    </type>
 </config>

@@ -35,21 +35,39 @@ class Catalog
         private readonly StoreManagerInterface $storeManager,
         private readonly Emulation $emulation,
         private readonly Config $config,
+        private readonly Stock $stock,
     ) {
     }
 
     /**
-     * Ids of the products to upload for a changed product: itself if it is visible, otherwise its parents.
+     * Ids of the products to upload for a changed product: itself if it is visible, and its configurable parents
+     * (their stock is the sum of the children).
      *
      * @return list<int>
      */
     public function catalogIds(int $productId, int $visibility): array
     {
-        if ($visibility !== Visibility::VISIBILITY_NOT_VISIBLE) {
-            return [$productId];
+        $parents = array_map('intval', $this->configurable->getParentIdsByChild($productId));
+
+        return array_values(array_unique($visibility !== Visibility::VISIBILITY_NOT_VISIBLE ? [$productId, ...$parents] : $parents));
+    }
+
+    /**
+     * Products whose stock changed (orders, refunds, stock saves) with their configurable parents.
+     *
+     * @param array<int> $productIds
+     *
+     * @return list<int>
+     */
+    public function withParents(array $productIds): array
+    {
+        $productIds = array_values(array_unique(array_map('intval', $productIds)));
+
+        if ($productIds === []) {
+            return [];
         }
 
-        return array_values(array_map('intval', $this->configurable->getParentIdsByChild($productId)));
+        return array_values(array_unique([...$productIds, ...array_map('intval', $this->configurable->getParentIdsByChild($productIds))]));
     }
 
     /**
@@ -81,6 +99,7 @@ class Catalog
                 // Without addPriceData(): it joins the price index and drops products that are not indexed yet.
                 ->addAttributeToSelect(['name', 'status', 'visibility', 'image', 'price', 'special_price', 'special_from_date', 'special_to_date', 'url_key', 'manufacturer', 'brand', 'tax_class_id'])
                 ->addUrlRewrite();
+            $this->stock->joinSalability($collection);
             $store = $this->storeManager->getStore($storeId);
             $currency = (string) $store->getCurrentCurrencyCode();
             $mediaUrl = rtrim((string) $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA), '/') . '/catalog/product';
@@ -88,12 +107,18 @@ class Catalog
             $labels = [];
             $categoryLists = [];
             $found = [];
+            foreach ($collection as $product) {
+                $this->stock->salabilityLoaded($product);
+            }
+
+            $visible = array_filter($collection->getItems(), static fn (Product $product): bool => (int) $product->getVisibility() !== Visibility::VISIBILITY_NOT_VISIBLE);
+            $stock = $this->stock->quantities($visible, $storeId, (int) $store->getWebsiteId());
 
             /** @var Product $product */
             foreach ($collection as $product) {
                 $found[] = (int) $product->getId();
 
-                if ((int) $product->getVisibility() === Visibility::VISIBILITY_NOT_VISIBLE) {
+                if (!isset($visible[$product->getId()])) {
                     continue;
                 }
 
@@ -101,7 +126,7 @@ class Catalog
                 $categoryLists[] = $categories;
                 $attributes = $this->attributeValues($product);
                 $labels[(string) $product->getId()] = array_map(static fn (array $attribute): string => $attribute[0], $attributes);
-                $items[] = $this->item($product, $categories, $currency, $mediaUrl, $attributes);
+                $items[] = $this->item($product, $categories, $currency, $mediaUrl, $attributes, $stock[(int) $product->getId()] ?? null);
             }
 
             $missing = array_values(array_map('strval', array_diff($productIds, $found)));
@@ -216,10 +241,11 @@ class Catalog
     /**
      * @param list<int> $categories the deepest first
      * @param array<string, array{0: string, 1: string}> $attributes attributeValues()
+     * @param int|null $stock units in stock (Stock), null when the store does not track them for the product
      *
      * @return array<string, mixed>
      */
-    private function item(Product $product, array $categories, string $currency, string $mediaUrl, array $attributes): array
+    private function item(Product $product, array $categories, string $currency, string $mediaUrl, array $attributes, ?int $stock): array
     {
         $final = (float) $product->getPriceInfo()->getPrice('final_price')->getAmount()->getValue();
         $regular = (float) $product->getPriceInfo()->getPrice('regular_price')->getAmount()->getValue();
@@ -236,7 +262,8 @@ class Catalog
             $categories,
             $regular > $final ? $regular : null,
             $this->brand($product),
-            array_column($attributes, 1, 0)
+            array_column($attributes, 1, 0),
+            $stock
         );
     }
 

@@ -12,4 +12,7 @@
     <event name="controller_action_predispatch_checkout_index_index">
         <observer name="onetrace_checkout_started" instance="OneTrace\Connector\Observer\CheckoutStarted"/>
     </event>
+    <event name="layout_generate_blocks_after">
+        <observer name="onetrace_hide_stock_alert" instance="OneTrace\Connector\Observer\HideStockAlert"/>
+    </event>
 </config>

@@ -4,6 +4,9 @@
         <referenceContainer name="before.body.end">
             <block class="OneTrace\Connector\Block\ProductView" name="onetrace.product.view" template="OneTrace_Connector::product_view.phtml"/>
         </referenceContainer>
+        <referenceContainer name="product.info.main">
+            <block class="OneTrace\Connector\Block\Notify" name="onetrace.notify" after="alert.urls"/>
+        </referenceContainer>
         <referenceContainer name="content.aside">
             <block class="OneTrace\Connector\Block\Widget" name="onetrace.widget.product" before="-">
                 <arguments>

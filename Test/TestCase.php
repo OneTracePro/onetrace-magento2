@@ -71,7 +71,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
             ->setVisibility($data['visibility'] ?? Visibility::VISIBILITY_BOTH)
             ->setStatus(Status::STATUS_ENABLED)
             ->setWebsiteIds([1])
-            ->setStockData(['use_config_manage_stock' => 1, 'qty' => 100, 'is_in_stock' => 1]);
+            ->setStockData($data['stock'] ?? ['use_config_manage_stock' => 1, 'qty' => 100, 'is_in_stock' => 1]);
 
         if (isset($data['category_ids'])) {
             $product->setCategoryIds($data['category_ids']);
@@ -149,6 +149,28 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
 
         /** @var Order */
         return $management->submit($quotes->get($quote->getId()));
+    }
+
+    /**
+     * The last catalog upload of a product.
+     *
+     * @return array<string, mixed>|null
+     */
+    protected function uploaded(int $productId): ?array
+    {
+        $found = null;
+
+        foreach ($this->platform->requests as $request) {
+            if ($request['method'] === 'POST' && $request['path'] === '/api/v1/products') {
+                foreach ($request['body']['items'] ?? [] as $item) {
+                    if ($item['id'] === (string) $productId) {
+                        $found = $item;
+                    }
+                }
+            }
+        }
+
+        return $found;
     }
 
     protected function flush(): array

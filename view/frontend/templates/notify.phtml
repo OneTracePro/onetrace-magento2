@@ -1,0 +1,9 @@
+<?php
+/** @var \OneTrace\Connector\Block\Notify $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$productId = $block->productId();
+if ($productId === null) {
+    return;
+}
+?>
+<div data-cdp-notify="<?= $escaper->escapeHtmlAttr($productId) ?>"></div>

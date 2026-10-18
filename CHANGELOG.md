@@ -2,6 +2,15 @@
 
 All notable changes are documented here. The project follows [Semantic Versioning](https://semver.org/).
 
+## 1.5.0 — 2026-10-18
+
+- Stock in the catalog: `stock` of a product is the salable quantity of the website's stock with Inventory (MSI), otherwise the quantity of the legacy stock item above the out-of-stock threshold; a configurable product has the sum of its enabled children. Products without stock management or with backorders (their own or the store's default), and configurable products with such a child, have no `stock`. The platform uses it only with stock levels on in its catalog settings.
+- Products are sent again when their stock or salability changes: a placed or cancelled order, a refunded credit memo, a saved stock item, saved or deleted source items of Inventory; a configurable parent goes with its children.
+- `available` of catalog items comes from the stock index of the website (it was true for enabled products that were out of stock); a product not indexed yet keeps its status.
+- Wishlist events from the server with the "Cart" setting: `add_to_wishlist` for a new item of Magento's wishlist and `remove_from_wishlist` when the last item of the product is removed — by the customer, with a quantity of 0, by moving it to the cart, through GraphQL or the admin. The customer id comes with the tracker cookie of the customer's own browser on the storefront.
+- "Notify when available": the page of a product that cannot be bought gets `<div data-cdp-notify="{product id}">`, where the tracker draws the form of that kind (Site → Forms of the platform); Magento's own "Notify me when this product is in stock" link is hidden there. The "Show the “Notify when available” form" setting, on by default.
+- Requires onetrace-php 1.10 and Magento_CatalogInventory.
+
 ## 1.4.0 — 2026-10-13
 
 - Promo codes: Stores → Configuration → OneTrace → Promo codes binds a pool of OneTrace promo codes to a cart price rule with a specific coupon and auto generation ("pool_key = rule id" per line). Every 5 minutes (cron) new and changed codes of the pool come by the cursor of the platform and become coupons of the rule, one use each with the expiry of the code; coupons of other rules with the same code are left as they are. The connection test checks the promo.read permission.

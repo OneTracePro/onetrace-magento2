@@ -22,8 +22,9 @@ Connects a Magento 2 / Adobe Commerce store to [OneTrace.pro](https://onetrace.p
 | `order_completed` | the order is placed (any checkout, REST, GraphQL, admin) | server |
 | `order_paid`, `order_refunded`, `order_cancelled` | an invoice is paid, a credit memo is refunded, the order is cancelled | server, once per order event |
 | `add_to_cart`, `remove_from_cart`, `checkout_started` | cart changes and the checkout page, for visitors with the tracker cookie or signed in | server |
+| `add_to_wishlist`, `remove_from_wishlist` | Magento's wishlist: adding, removing, moving to the cart (storefront, GraphQL, admin) | server |
 | `product_viewed`, page views | the storefront | browser tracker, works with the full page cache and Varnish |
-| Product catalog | product changes, daily, and the "Upload the whole catalog" button | server, `products.write` |
+| Product catalog with stock | product and stock changes (orders, cancellations, refunds, stock and source items), daily, and the "Upload the whole catalog" button | server, `products.write` |
 | `search` | the first page of the store search results, with "Product search" on | server |
 
 Guest orders without the tracker cookie are linked by email; later events of an order (invoice, refund) use the browser of its checkout, so everything lands in one profile.
@@ -46,6 +47,12 @@ bin/magento setup:static-content:deploy
 
 - Widgets from **Site → Widgets** of the platform: set their ids for the product page and the cart in the settings, or add the **OneTrace recommendations** widget in **Content → Widgets**. The current product, category and cart products are passed to the widget.
 - Web Push: turn it on in the settings — the module serves `/cdp-sw.js` from the store root.
+
+## Stock and "Notify when available"
+
+- **Stock:** catalog items carry `stock` where the store tracks it — the salable quantity of the website's stock with Inventory (MSI: quantity minus reservations of open orders and the out-of-stock threshold), otherwise the quantity of the stock item. A configurable product has the sum of its enabled children. Products without "Manage Stock", with backorders (also from the store's defaults) or with such a child have no `stock`: zero there does not mean "sold out". Orders, cancellations, refunds and saved stock (the product form, the REST API, source items) send the product again. The platform uses the stock only with stock levels on in its catalog settings: zero takes the product off sale, and the "low stock" journey trigger works.
+- **"Notify when available":** the page of a product that cannot be bought gets `<div data-cdp-notify="{product id}">` in the product info column; the tracker draws the form of the "Notify when available" kind from **Site → Forms** of the platform there, and a journey with the Catalog → "back in stock" trigger sends the notification. Magento's own "Notify me when this product is in stock" link is hidden on such pages. Turn it off with **What to send → Show the "Notify when available" form**.
+- **Wishlist:** adding to and removing from Magento's wishlist are sent with the "Cart" setting, for price drop and back in stock journeys of products in the wishlist.
 
 ## Languages of the catalog
 
@@ -101,6 +108,8 @@ bin/magento onetrace:sync-catalog     # uploads the whole catalog now
 ```bash
 tests/env/run.sh                                          # integration tests: Magento 2.4.8 in Docker
 MAGENTO_TAG=php82-fpm-magento2.4.7-p10 tests/env/run.sh   # another version
+ONETRACE_PHP=../onetrace-php tests/env/run.sh             # with an unreleased onetrace-php from its working copy
+tests/env/smoke.sh                                        # the storefront over HTTP after run.sh
 ```
 
 The tests run inside [ready Magento images](https://hub.docker.com/r/michielgerritsen/magento-project-community-edition) with the module installed from the working copy: orders go through the real quote submit, invoices, credit memos and newsletter subscriptions.

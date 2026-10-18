@@ -13,13 +13,18 @@
         "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
         "magento/framework": "^103.0.7",
         "magento/module-catalog": "^104.0",
+        "magento/module-catalog-inventory": "^100.4",
         "magento/module-checkout": "^100.4",
         "magento/module-configurable-product": "^100.4",
         "magento/module-customer": "^103.0",
         "magento/module-newsletter": "^100.4",
         "magento/module-sales": "^103.0",
         "magento/module-store": "^101.1",
-        "onetracepro/onetrace-php": "^1.7"
+        "onetracepro/onetrace-php": "^1.10"
+    },
+    "suggest": {
+        "magento/module-inventory-sales": "Inventory (MSI): the salable quantity of the website's stock goes to the catalog",
+        "magento/module-wishlist": "Wishlist events add_to_wishlist and remove_from_wishlist"
     },
     "autoload": {
         "files": ["registration.php"],
