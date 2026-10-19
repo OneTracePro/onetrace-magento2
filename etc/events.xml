@@ -19,6 +19,16 @@
         <observer name="onetrace_order_refunded" instance="OneTrace\Connector\Observer\OrderRefunded"/>
         <observer name="onetrace_stock_refunded" instance="OneTrace\Connector\Observer\StockChanged"/>
     </event>
+    <!-- Shipments: tracks of a new shipment are saved after the shipment, a track may also be added later. -->
+    <event name="sales_order_shipment_save_after">
+        <observer name="onetrace_order_shipped" instance="OneTrace\Connector\Observer\OrderShipped"/>
+    </event>
+    <event name="sales_order_shipment_track_save_after">
+        <observer name="onetrace_shipment_tracked" instance="OneTrace\Connector\Observer\ShipmentTracked"/>
+    </event>
+    <event name="sales_order_save_after">
+        <observer name="onetrace_order_delivered" instance="OneTrace\Connector\Observer\OrderDelivered"/>
+    </event>
     <event name="customer_register_success">
         <observer name="onetrace_customer_registered" instance="OneTrace\Connector\Observer\CustomerChanged"/>
         <observer name="onetrace_referral_registered" instance="OneTrace\Connector\Observer\ReferralRegistered"/>

@@ -52,7 +52,13 @@
             "onetrace_loyalty_discount": true,
             "base_onetrace_loyalty_discount": true,
             "onetrace_loyalty_redemption": true,
-            "onetrace_loyalty_confirmed_at": true
+            "onetrace_loyalty_confirmed_at": true,
+            "onetrace_delivered_at": true
+        }
+    },
+    "sales_shipment": {
+        "column": {
+            "onetrace_shipped": true
         }
     },
     "sales_invoice": {

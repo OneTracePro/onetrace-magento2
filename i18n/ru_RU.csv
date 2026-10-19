@@ -22,7 +22,7 @@
 "Cookie consent","Согласие на cookie"
 "With ""Cookie Restriction Mode"" on, load the tracker after the visitor allows cookies.","При включённом «Режиме ограничения cookie» загружать трекер после разрешения cookie посетителем."
 "Orders","Заказы"
-"Placed, paid (invoiced), cancelled and refunded orders with the customer data.","Оформленные, оплаченные (по счёту), отменённые заказы и возвраты с данными покупателя."
+"Placed, paid (invoiced), shipped (with the carrier and the tracking number), cancelled and refunded orders with the customer data.","Оформленные, оплаченные (по счёту), отправленные (со службой доставки и трек-номером), отменённые заказы и возвраты с данными покупателя."
 "Cart","Корзина"
 "Adding to and removing from the cart and the wishlist, opening the checkout — for abandoned cart, price drop and back in stock journeys.","Добавление в корзину и избранное и удаление из них, переход к оформлению — для цепочек брошенной корзины, снижения цены и поступления в продажу."
 "Product catalog","Каталог товаров"
@@ -99,3 +99,5 @@ Your promo codes,Ваши промокоды
 valid until %1,действует до %1
 "Show the “Notify when available” form","Показывать форму «Сообщить о поступлении»"
 "On the page of a product that cannot be bought — the form of the “Notify when available” kind from Site → Forms of the platform, drawn by the tracker; Magento's own “Notify me when this product is in stock” link is hidden then. A journey with the Catalog → “back in stock” trigger sends the notification.","На странице товара, который нельзя купить, — форма вида «Сообщить о поступлении» из раздела «Сайт → Формы» платформы (её рисует трекер); своя ссылка Magento «Сообщить о поступлении товара» при этом скрывается. Уведомление отправляет цепочка с триггером «Каталог → снова в наличии»."
+"Delivered order statuses","Статусы доставленного заказа"
+"Magento has no delivery state: an order that moves to one of these statuses is sent once as delivered (order_delivered), e.g. a ""Delivered"" status your shipping extension or staff set. ""Complete"" means invoiced and shipped, not delivered. Nothing selected — not sent.","В Magento нет состояния «доставлен»: заказ, перешедший в один из этих статусов, один раз отправляется как доставленный (order_delivered) — например, статус «Доставлен», который ставит модуль доставки или сотрудник. «Complete» (выполнен) означает «счёт выставлен и отгружен», а не «доставлен». Ничего не выбрано — не отправляется."

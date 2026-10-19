@@ -65,6 +65,17 @@ class Config
         return preg_match('/^[a-z0-9_-]{1,64}$/', $topic) === 1 ? $topic : null;
     }
 
+    /**
+     * Order statuses that mean the order is delivered (Magento has no delivery state); empty — order_delivered is
+     * not sent.
+     *
+     * @return list<string>
+     */
+    public function deliveredStatuses(?int $storeId = null): array
+    {
+        return array_values(array_filter(array_map('trim', explode(',', (string) $this->value('parts/delivered_statuses', $storeId))), static fn (string $status): bool => $status !== ''));
+    }
+
     public function widget(string $place, ?int $storeId = null): string
     {
         $uid = trim((string) $this->value('widgets/' . $place, $storeId));

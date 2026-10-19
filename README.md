@@ -21,6 +21,8 @@ Connects a Magento 2 / Adobe Commerce store to [OneTrace.pro](https://onetrace.p
 | Newsletter consent | subscribing and unsubscribing in the store: registration, account, footer form, admin | server, with `identify` |
 | `order_completed` | the order is placed (any checkout, REST, GraphQL, admin) | server |
 | `order_paid`, `order_refunded`, `order_cancelled` | an invoice is paid, a credit memo is refunded, the order is cancelled | server, once per order event |
+| `order_shipped` — carrier, tracking number, shipped products | a shipment is created (admin, REST, shipping extensions) — with its tracking number, or when its first tracking number is added | server, once per shipment |
+| `order_delivered` | the order moves to a status of the "Delivered order statuses" setting | server, once per order |
 | `add_to_cart`, `remove_from_cart`, `checkout_started` | cart changes and the checkout page, for visitors with the tracker cookie or signed in | server |
 | `add_to_wishlist`, `remove_from_wishlist` | Magento's wishlist: adding, removing, moving to the cart (storefront, GraphQL, admin) | server |
 | `product_viewed`, page views | the storefront | browser tracker, works with the full page cache and Varnish |
@@ -42,6 +44,12 @@ bin/magento setup:static-content:deploy
 1. In your OneTrace project, open **API keys** and create a write key (for the storefront) and a secret key with the `products.write` permission (for the server).
 2. In **Stores → Configuration → OneTrace** enter the platform address (the domain you open OneTrace at) and both keys, then click **Test connection**.
 3. Make sure Magento cron runs: the queue is sent every minute.
+
+## Shipments and delivery
+
+- **Shipped:** each shipment of an order is one `order_shipped` (a second parcel is a new event): the carrier (the title of the tracking number, or the carrier code), the tracking number and the products of the shipment; the messageId ends with the shipment number. Magento does not store a tracking link, so `tracking_url` is not sent. A shipment created with a tracking number is sent at once; one without a tracking number waits for the first one added later (the "Add tracking number" button, the REST API, a shipping extension), and after an hour without one cron (`onetrace_shipments`) sends it without the number. Later tracking numbers and shipments made before the module was installed are not sent.
+- **Delivered:** Magento has no delivery state. Choose the statuses that mean "the customer received the order" in **What to send → Delivered order statuses** (empty by default — nothing is sent), e.g. a "Delivered" status of **Stores → Order Status** that your shipping extension or staff set. An order that moves to one of them is sent once as `order_delivered`. "Complete" means invoiced and shipped, not delivered.
+- The online chat AI of the platform answers "where is my order" with the carrier and the tracking number of these events.
 
 ## Recommendations and Web Push
 

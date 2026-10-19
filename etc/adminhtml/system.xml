@@ -44,8 +44,15 @@
                 </field>
                 <field id="orders" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Orders</label>
-                    <comment>Placed, paid (invoiced), cancelled and refunded orders with the customer data.</comment>
+                    <comment>Placed, paid (invoiced), shipped (with the carrier and the tracking number), cancelled and refunded orders with the customer data.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="delivered_statuses" translate="label comment" type="multiselect" sortOrder="35" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Delivered order statuses</label>
+                    <comment>Magento has no delivery state: an order that moves to one of these statuses is sent once as delivered (order_delivered), e.g. a "Delivered" status your shipping extension or staff set. "Complete" means invoiced and shipped, not delivered. Nothing selected — not sent.</comment>
+                    <source_model>OneTrace\Connector\Model\Source\OrderStatuses</source_model>
+                    <can_be_empty>1</can_be_empty>
+                    <depends><field id="orders">1</field></depends>
                 </field>
                 <field id="cart" translate="label comment" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Cart</label>

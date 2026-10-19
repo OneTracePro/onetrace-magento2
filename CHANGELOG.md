@@ -2,6 +2,12 @@
 
 All notable changes are documented here. The project follows [Semantic Versioning](https://semver.org/).
 
+## 1.6.0 — 2026-10-19
+
+- `order_shipped` once per shipment (a second parcel of the order is a new event, the messageId ends with the shipment's increment id): the carrier (the title of the first track, or its carrier code), the tracking number and the shipped products. A shipment created with a tracking number is sent at once; one without waits for its first track added later (`sales_order_shipment_track_save_after`: the "Add tracking number" button, the REST API, shipping extensions), and the `onetrace_shipments` cron job sends it without the number after an hour. The state is kept in the new `sales_shipment.onetrace_shipped` column; shipments made before the update are not sent. No `tracking_url`: Magento does not store one.
+- `order_delivered` once per order when it moves to a status of the new "Delivered order statuses" setting (What to send, empty by default: Magento has no delivery state), remembered in the new `sales_order.onetrace_delivered_at` column.
+- Requires onetrace-php 1.11.
+
 ## 1.5.0 — 2026-10-18
 
 - Stock in the catalog: `stock` of a product is the salable quantity of the website's stock with Inventory (MSI), otherwise the quantity of the legacy stock item above the out-of-stock threshold; a configurable product has the sum of its enabled children. Products without stock management or with backorders (their own or the store's default), and configurable products with such a child, have no `stock`. The platform uses it only with stock levels on in its catalog settings.

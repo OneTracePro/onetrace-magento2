@@ -11,6 +11,7 @@
                 <tracker>1</tracker>
                 <wait_for_consent>1</wait_for_consent>
                 <orders>1</orders>
+                <delivered_statuses/>
                 <cart>1</cart>
                 <catalog>1</catalog>
                 <newsletter>1</newsletter>

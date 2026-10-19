@@ -10,6 +10,7 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Locale\ResolverInterface;
 use Magento\Sales\Model\Order as SalesOrder;
 use Magento\Sales\Model\Order\Creditmemo;
+use Magento\Sales\Model\Order\Shipment;
 use OneTrace\Commerce\Customer;
 use OneTrace\Commerce\LineItem;
 use OneTrace\Commerce\Order;
@@ -108,6 +109,30 @@ class Mapper
             }
 
             $lines[] = $this->line($orderItem, (float) $item->getRowTotal() - (float) $item->getDiscountAmount(), (int) $item->getQty());
+        }
+
+        return $lines;
+    }
+
+    /**
+     * Shipped products of a shipment, priced as in the order.
+     *
+     * @return list<LineItem>
+     */
+    public function shipmentLines(Shipment $shipment): array
+    {
+        $lines = [];
+
+        foreach ($shipment->getAllItems() as $item) {
+            $orderItem = $item->getOrderItem();
+            $quantity = (int) $item->getQty();
+
+            if ($orderItem === null || $orderItem->getParentItemId() || $quantity <= 0) {
+                continue;
+            }
+
+            $total = ((float) $orderItem->getRowTotal() - (float) $orderItem->getDiscountAmount()) / max(1.0, (float) $orderItem->getQtyOrdered()) * $quantity;
+            $lines[] = $this->line($orderItem, $total, $quantity);
         }
 
         return $lines;

@@ -54,6 +54,11 @@
         <column xsi:type="decimal" name="base_onetrace_loyalty_discount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="OneTrace: discount of the held points, base currency"/>
         <column xsi:type="varchar" name="onetrace_loyalty_redemption" nullable="true" length="64" comment="OneTrace: redemption id"/>
         <column xsi:type="datetime" name="onetrace_loyalty_confirmed_at" nullable="true" comment="OneTrace: redemption confirmed"/>
+        <column xsi:type="datetime" name="onetrace_delivered_at" nullable="true" comment="OneTrace: order_delivered sent"/>
+    </table>
+    <!-- order_shipped once per shipment: 0 — made before the module, 1 — waits for a tracking number, 2 — sent. -->
+    <table name="sales_shipment" resource="sales">
+        <column xsi:type="smallint" name="onetrace_shipped" unsigned="true" nullable="false" default="0" comment="OneTrace: order_shipped state"/>
     </table>
     <table name="sales_invoice" resource="sales">
         <column xsi:type="decimal" name="onetrace_loyalty_discount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="OneTrace: bonus points discount"/>
