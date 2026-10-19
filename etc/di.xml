@@ -57,4 +57,24 @@
     <type name="Magento\InventoryApi\Api\SourceItemsDeleteInterface">
         <plugin name="onetrace_source_items" type="OneTrace\Connector\Plugin\SourceItemsChanged"/>
     </type>
+    <!-- Store emails through OneTrace: the template of an email for its transport, and the transport itself. The
+         plugin runs first (sortOrder below Magento's "Disable Email Communications" and SMTP extensions): what OneTrace
+         does not accept goes on through them. -->
+    <type name="Magento\Framework\Mail\Template\TransportBuilder">
+        <plugin name="onetrace_email_context" type="OneTrace\Connector\Plugin\EmailContext"/>
+    </type>
+    <type name="Magento\Framework\Mail\TransportInterface">
+        <plugin name="onetrace_store_emails" type="OneTrace\Connector\Plugin\SendThroughOneTrace" sortOrder="-100"/>
+    </type>
+    <!-- Storefront links in emails sent from the admin and cron. -->
+    <virtualType name="OneTrace\Connector\Model\Email\FrontendUrlFactory" type="Magento\Framework\UrlFactory">
+        <arguments>
+            <argument name="instanceName" xsi:type="string">Magento\Framework\Url</argument>
+        </arguments>
+    </virtualType>
+    <type name="OneTrace\Connector\Model\Email\OrderData">
+        <arguments>
+            <argument name="urlFactory" xsi:type="object">OneTrace\Connector\Model\Email\FrontendUrlFactory</argument>
+        </arguments>
+    </type>
 </config>

@@ -16,7 +16,7 @@ use OneTrace\Commerce\Messages;
  */
 class Connection
 {
-    public const VERSION = '1.5.0';
+    public const VERSION = '1.7.0';
 
     /** @var array<string, Client> */
     private array $clients = [];
@@ -34,18 +34,20 @@ class Connection
     }
 
     /**
-     * @param string $key "secret", "write" or "search" (the write key with short timeouts: a visitor waits for it)
+     * @param string $key "secret", "write", "search" (the write key with short timeouts: a visitor waits for it) or
+     *                    "email" (the secret key with short timeouts: a store email waits for it)
      */
     public function client(int $storeId, string $key = 'secret'): Client
     {
         $cacheKey = $storeId . ':' . $key;
         $write = $key === 'write' || $key === 'search';
+        $timeouts = ['search' => [3.0, 2.0], 'email' => [5.0, 3.0]][$key] ?? [10.0, 5.0];
 
         if (!isset($this->clients[$cacheKey])) {
             $this->clients[$cacheKey] = new Client($this->config->url($storeId), [
                 $write ? 'write_key' : 'secret_key' => ($write ? $this->config->writeKey($storeId) : $this->config->secretKey($storeId)) ?: null,
-                'timeout' => $key === 'search' ? 3.0 : 10.0,
-                'connect_timeout' => $key === 'search' ? 2.0 : 5.0,
+                'timeout' => $timeouts[0],
+                'connect_timeout' => $timeouts[1],
                 // The queue retries with long pauses; the client must not hold the cron run.
                 'max_retries' => 0,
                 'user_agent' => sprintf('onetrace-magento2/%s Magento/%s', self::VERSION, $this->productMetadata->getVersion()),

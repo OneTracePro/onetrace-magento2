@@ -4,7 +4,7 @@
 [![Packagist](https://img.shields.io/packagist/v/onetracepro/onetrace-magento2.svg)](https://packagist.org/packages/onetracepro/onetrace-magento2)
 [![License](https://img.shields.io/packagist/l/onetracepro/onetrace-magento2.svg)](LICENSE)
 
-Connects a Magento 2 / Adobe Commerce store to [OneTrace.pro](https://onetrace.pro), the customer data platform: orders, customers and newsletter consents from the server, the website tracker, the product catalog, recommendation widgets and Web Push. Abandoned cart, browse abandonment, post-purchase and win-back journeys, product recommendations and predictions work right after you connect the store.
+Connects a Magento 2 / Adobe Commerce store to [OneTrace.pro](https://onetrace.pro), the customer data platform: orders, customers and newsletter consents from the server, the website tracker, the product catalog, recommendation widgets, Web Push and the store's emails through OneTrace. Abandoned cart, browse abandonment, post-purchase and win-back journeys, product recommendations and predictions work right after you connect the store.
 
 [Русская версия](README.ru.md)
 
@@ -41,7 +41,7 @@ bin/magento setup:di:compile         # production mode
 bin/magento setup:static-content:deploy
 ```
 
-1. In your OneTrace project, open **API keys** and create a write key (for the storefront) and a secret key with the `products.write` permission (for the server).
+1. In your OneTrace project, open **API keys** and create a write key (for the storefront) and a secret key with the `products.write` permission (for the server; add `messages.send` to send the store's emails through OneTrace).
 2. In **Stores → Configuration → OneTrace** enter the platform address (the domain you open OneTrace at) and both keys, then click **Test connection**.
 3. Make sure Magento cron runs: the queue is sent every minute.
 
@@ -50,6 +50,45 @@ bin/magento setup:static-content:deploy
 - **Shipped:** each shipment of an order is one `order_shipped` (a second parcel is a new event): the carrier (the title of the tracking number, or the carrier code), the tracking number and the products of the shipment; the messageId ends with the shipment number. Magento does not store a tracking link, so `tracking_url` is not sent. A shipment created with a tracking number is sent at once; one without a tracking number waits for the first one added later (the "Add tracking number" button, the REST API, a shipping extension), and after an hour without one cron (`onetrace_shipments`) sends it without the number. Later tracking numbers and shipments made before the module was installed are not sent.
 - **Delivered:** Magento has no delivery state. Choose the statuses that mean "the customer received the order" in **What to send → Delivered order statuses** (empty by default — nothing is sent), e.g. a "Delivered" status of **Stores → Order Status** that your shipping extension or staff set. An order that moves to one of them is sent once as `order_delivered`. "Complete" means invoiced and shipped, not delivered.
 - The online chat AI of the platform answers "where is my order" with the carrier and the tracking number of these events.
+
+## Store emails
+
+Magento's emails — order confirmations, invoices, shipments, credit memos, registration, password resets — can go through the email integration of your OneTrace project instead of the store's mail server, with delivery statuses and history in the customer profile. Turn it on in **Store emails** of the platform (nothing to set in Magento); the secret key needs the `messages.send` permission ("Send messages manually"). **Stores → Configuration → OneTrace → Store emails** shows the state for the store view.
+
+- **As is** (relay of store emails on): the rendered email — subject, HTML, text, sender name, reply-to and attachments (PDF, PNG, JPEG, GIF, text, CSV, calendar; up to 5 files and 5 MB) — goes to each recipient through OneTrace.
+- **From OneTrace templates** (order emails chosen in the platform): instead of Magento's HTML the module sends the order — the number, the order page (My Account, or "Orders and Returns" for guests), products with SKU, image, link and options, totals, payment and shipping methods, addresses, the carrier, tracking number and tracking link of the shipment, the refunded amount of the credit memo — and OneTrace builds the email in the language of the store view.
+- `order_delivered` and `order_cancelled` have no Magento email: with their template on, the module sends them once per order when the order moves to a status of "Delivered order statuses" or is cancelled.
+- **Fallback:** whatever OneTrace does not accept — no email integration, the message quota is used up, too many emails to the recipient, no answer within 5 seconds — Magento sends itself, to the recipients OneTrace did not accept (one request per recipient, no retries). Emails with images embedded in the message (`cid:`) or attachments of other types are sent by Magento. With "Disable Email Communications" nothing is sent; emails of admin users (password reset, two-factor authentication) are always sent by Magento.
+- The settings of the platform are read every 5 minutes and when the module settings are saved.
+- Any mail transport works (sendmail, SMTP, SMTP extensions): the module is the first plugin of Magento's mail transport (`Magento\Framework\Mail\TransportInterface::sendMessage`, Laminas Mail in 2.4.7, Symfony Mailer in 2.4.8+), the kind of an email comes from its template in the `TransportBuilder` (custom templates of **Marketing → Email Templates** by the template they were made from).
+
+| Magento email (template) | Kind | OneTrace template |
+|---|---|---|
+| New order (`sales_email_order_template`, `…_guest_template`) | `order_placed` | yes |
+| Invoice (`sales_email_invoice_template`, guest) | `order_paid` | yes |
+| Shipment (`sales_email_shipment_template`, guest) — with the tracking number of the shipment | `order_shipped` | yes |
+| Credit memo (`sales_email_creditmemo_template`, guest) | `order_refunded` | yes |
+| — (the order moves to a delivered status) | `order_delivered` | only from the template |
+| — (the order is cancelled) | `order_cancelled` | only from the template |
+| Comments of orders, invoices, shipments and credit memos | `order_note` | no |
+| Ready for pickup (In-Store Pickup) | `order_ready_for_pickup` | no |
+| Guest's confirmation of the order cancellation (link) | `login_link` | no |
+| New account, account without a password, account confirmed | `account_new` | no |
+| Account confirmation (link) | `email_verification` | no |
+| Forgot password, password reminder | `password_reset` | no |
+| Password changed | `password_changed` | no |
+| Account information changed | `account_changed` | no |
+| Newsletter confirmation, subscription, unsubscription | `newsletter_confirmation`, `newsletter_subscribed`, `newsletter_unsubscribed` | no |
+| Shared wishlist, "Email to a friend" | `wishlist_shared`, `product_shared` | no |
+| Price and stock alerts | `price_alert`, `stock_alert` | no |
+| Contact form, payment failed, cron and import errors (to the staff) | — | always Magento |
+| Copies to the staff ("Send Order Email Copy To", Bcc and Cc, any recipient other than the order's customer) | — | always Magento |
+| Admin user emails (`admin_emails_*`, two-factor authentication, the admin area) | — | always Magento |
+| Other emails of Magento and extensions | `other` (an order kind if the template has the order) | no |
+
+Emails to the store owner and staff never go through OneTrace, also with relay on: there they would become customer profiles. In an order email with copies to the staff the customer's email goes through OneTrace, and Magento sends the copies to the staff only.
+
+Emails with access links (`password_reset`, `account_new`, `email_verification`, `login_link`) are sent without click tracking, and only their subject is kept.
 
 ## Recommendations and Web Push
 

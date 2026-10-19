@@ -30,6 +30,14 @@
                     <frontend_model>OneTrace\Connector\Block\Adminhtml\TestButton</frontend_model>
                 </field>
             </group>
+            <group id="emails" translate="label comment" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Store emails</label>
+                <comment>Order, registration and password emails of the store can go through the email integration of your OneTrace project, with delivery statuses and history in the customer profile, and order emails can be built from OneTrace templates in the customer's language. Turn them on in Store emails of the platform; the secret key needs the messages.send permission ("Send messages manually").</comment>
+                <field id="state" translate="label" type="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>State</label>
+                    <frontend_model>OneTrace\Connector\Block\Adminhtml\StoreEmails</frontend_model>
+                </field>
+            </group>
             <group id="parts" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>What to send</label>
                 <field id="tracker" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">

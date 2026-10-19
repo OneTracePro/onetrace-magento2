@@ -45,4 +45,6 @@ elif [ -n "${ONETRACE_PHP:-}" ]; then
     docker exec "$NAME" composer update onetracepro/onetrace-php onetracepro/onetrace-magento2 --no-plugins --no-interaction --quiet
 fi
 
+# Mailpit of the image receives the emails Magento sends itself (store email tests).
+docker exec "$NAME" sh -c 'supervisorctl start mailpit >/dev/null 2>&1 || true'
 docker exec "$NAME" sh -c 'php bin/magento setup:db:status >/dev/null || php bin/magento setup:upgrade --keep-generated >/dev/null; rm -rf generated/code/OneTrace; php vendor/bin/phpunit -c extensions/onetrace-magento2/Test/phpunit.xml.dist '"$*"

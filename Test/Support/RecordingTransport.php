@@ -13,7 +13,7 @@ use OneTrace\Http\Transport;
  */
 final class RecordingTransport implements Transport
 {
-    /** @var list<array{method: string, path: string, body: mixed, auth: string}> */
+    /** @var list<array{method: string, path: string, body: mixed, auth: string, idempotency_key: string}> */
     public $requests = [];
 
     /** @var list<Response> */
@@ -35,6 +35,7 @@ final class RecordingTransport implements Transport
             'path' => (string) parse_url($request->getUrl(), PHP_URL_PATH),
             'body' => json_decode((string) $request->getBody(), true),
             'auth' => (string) ($headers['authorization'] ?? ''),
+            'idempotency_key' => (string) ($headers['idempotency-key'] ?? ''),
         ];
 
         if ($this->responder !== null && ($response = ($this->responder)($request)) !== null) {
