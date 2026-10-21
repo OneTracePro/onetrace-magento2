@@ -12,6 +12,8 @@
             <module name="Magento_Sales"/>
             <module name="Magento_Newsletter"/>
             <module name="Magento_Widget"/>
+            <module name="Magento_Cms"/>
+            <module name="Magento_Shipping"/>
         </sequence>
     </module>
 </config>

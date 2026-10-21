@@ -1,0 +1,13 @@
+<!--@subject {{trans "Confirmation code"}} @-->
+<!--@vars {
+"var code":"Confirmation code",
+"var store.frontend_name":"Store Name"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<p>{{trans "Your code for the chat with %store_name: %code. It is valid for 10 minutes." store_name=$store.frontend_name code=$code}}</p>
+<p><strong style="font-size: 24px; letter-spacing: 4px;">{{var code}}</strong></p>
+<p>{{trans "If you did not ask for it, ignore this email."}}</p>
+
+{{template config_path="design/email/footer_template"}}

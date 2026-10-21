@@ -16,7 +16,7 @@ use OneTrace\Connector\Model\Config;
 class Tracker extends Template
 {
     /** Methods the stub queues until cdp.js loads: the same list as in the platform's install code. */
-    private const STUB_METHODS = ['init', 'page', 'track', 'identify', 'alias', 'reset', 'setLanguage', 'widgets', 'renderRecommendations', 'searchBoxes'];
+    private const STUB_METHODS = ['init', 'page', 'track', 'identify', 'alias', 'reset', 'setLanguage', 'widgets', 'renderRecommendations', 'searchBoxes', 'chatCustomer'];
 
     public function __construct(
         Context $context,

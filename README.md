@@ -135,6 +135,14 @@ welcome = 12
 
 Every 5 minutes (cron `onetrace_promo_sync`) new and changed unique codes of the pool become coupons of the rule, one use each with the expiry of the code. Coupons of other rules with the same code are not touched; pools with one shared code are not synced — add that coupon to a rule yourself. The order events carry the coupon, so the platform counts the use. The secret key needs `promo.read`.
 
+## AI chat bot: store MCP
+
+The AI bot of the OneTrace chat can answer customers with live data of the store and, if you allow it, act on orders. Turn on **Connect to the chat bot** in **Stores → Configuration → OneTrace → AI chat bot: store MCP** and save: the module connects its MCP server (`POST /onetrace/mcp` of the store view, store MCP contract v1) to the bot of the project. Store views of one project and website share one connection. The secret key needs the `chats.manage` permission.
+
+- **Reading** (on by default): orders of the customer (the account and guest orders with its email), an order with items, payment, shipping and the tracking number, stock and prices with configurable variants, active shipping methods for the country (flat rate per order and free shipping with its threshold have a price), the CMS page of the "Return policy page" setting.
+- **Actions** (off by default, allow them in "What the bot may do"): cancel an unpaid order (states `new` and `pending_payment`, nothing paid; the `cancellableStates` argument of `OneTrace\Connector\Model\StoreMcp\Tools` in `di.xml` changes the states), pass a return or delivery change request to the staff — an order comment and the "Request email template" to the "Requests to the staff" address. The bot acts only after the customer agreed in the chat.
+- **Customers**: signed-in customers are confirmed automatically (a signed token in the private `onetrace` section goes to `cdp.chatCustomer()`); guests and messenger customers get a 6-digit code by email ("Confirmation code email template"; an observer of `onetrace_store_mcp_send_code` can send it itself, e.g. by SMS, and set `sent` of the `transport`). Orders of other customers are "not found".
+
 ## Privacy
 
 - With **Cookie Restriction Mode** on, the tracker loads after the visitor allows cookies (can be turned off in the settings).

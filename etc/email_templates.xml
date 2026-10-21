@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Email:etc/email_templates.xsd">
+    <template id="onetrace_store_mcp_code_template" label="OneTrace: chat confirmation code" file="store_mcp_code.html" type="html" module="OneTrace_Connector" area="frontend"/>
+    <template id="onetrace_store_mcp_request_template" label="OneTrace: request from the chat" file="store_mcp_request.html" type="html" module="OneTrace_Connector" area="frontend"/>
+</config>

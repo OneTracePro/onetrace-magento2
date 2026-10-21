@@ -1,0 +1,14 @@
+<!--@subject {{trans "Order %order_number: %kind" order_number=$order_number kind=$kind}} @-->
+<!--@vars {
+"var order_number":"Order number",
+"var kind":"Request kind",
+"var request":"Request text"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<p>{{trans "The customer of order %order_number made a request in the OneTrace chat:" order_number=$order_number}}</p>
+<p>{{var request}}</p>
+<p>{{trans "The request is also in the comments of the order."}}</p>
+
+{{template config_path="design/email/footer_template"}}

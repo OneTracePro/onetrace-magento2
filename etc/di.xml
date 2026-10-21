@@ -66,6 +66,14 @@
     <type name="Magento\Framework\Mail\TransportInterface">
         <plugin name="onetrace_store_emails" type="OneTrace\Connector\Plugin\SendThroughOneTrace" sortOrder="-100"/>
     </type>
+    <!-- Store MCP server for the AI chat bot: its tools are built only when the platform calls them, not for the
+         customer-data section that asks for the chat token. -->
+    <type name="OneTrace\Connector\Model\StoreMcp">
+        <arguments>
+            <argument name="customers" xsi:type="object">OneTrace\Connector\Model\StoreMcp\Customers\Proxy</argument>
+            <argument name="tools" xsi:type="object">OneTrace\Connector\Model\StoreMcp\Tools\Proxy</argument>
+        </arguments>
+    </type>
     <!-- Storefront links in emails sent from the admin and cron. -->
     <virtualType name="OneTrace\Connector\Model\Email\FrontendUrlFactory" type="Magento\Framework\UrlFactory">
         <arguments>

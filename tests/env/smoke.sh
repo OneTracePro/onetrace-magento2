@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # Storefront check over HTTP after tests/env/run.sh: the tracker in <head>, product_viewed with the product widget
 # on a product page, /cdp-sw.js from the store root, the search box suggestions and the store search when the
-# platform does not answer, the "Notify when available" form instead of Magento's stock alert on a sold-out product.
+# platform does not answer, the "Notify when available" form instead of Magento's stock alert on a sold-out product,
+# the store MCP server at /onetrace/mcp (a POST without a form key, the platform key only).
 set -euo pipefail
 TAG="${MAGENTO_TAG:-php84-fpm-magento2.4.8-p5}"
 NAME="onetrace-m2-${TAG//./-}"
 PORT="${MAGENTO_PORT:-8892}"
 
 PRODUCTS=$(docker exec "$NAME" sh -c '
-    for path in "onetrace/connection/url https://cdp.example.com" "onetrace/connection/write_key cdp_wk_smoke" "onetrace/widgets/push 1" "onetrace/widgets/product k3x9" "onetrace/parts/search 1" "catalog/productalert/allow_stock 1"; do
+    for path in "onetrace/connection/url https://cdp.example.com" "onetrace/connection/write_key cdp_wk_smoke" "onetrace/widgets/push 1" "onetrace/widgets/product k3x9" "onetrace/parts/search 1" "catalog/productalert/allow_stock 1" "onetrace/connection/secret_key cdp_sk_smoke" "onetrace/store_mcp/enabled 1"; do
         php bin/magento config:set $path >/dev/null
     done
     php bin/magento cache:flush >/dev/null
@@ -21,10 +22,10 @@ PRODUCTS=$(docker exec "$NAME" sh -c '
         \$om->get(\Magento\Catalog\Api\ProductRepositoryInterface::class)->save(\$p);
         \$sold = \$om->create(\Magento\Catalog\Api\Data\ProductInterface::class)->setTypeId(\"simple\")->setAttributeSetId(4)->setSku(\$key . \"-sold\")->setUrlKey(\$key . \"-sold\")->setName(\"Smoke sold out\")->setPrice(10)->setVisibility(4)->setStatus(1)->setWebsiteIds([1])->setStockData([\"use_config_manage_stock\" => 1, \"qty\" => 0, \"is_in_stock\" => 0]);
         \$sold = \$om->get(\Magento\Catalog\Api\ProductRepositoryInterface::class)->save(\$sold);
-        echo \$key, \" \", \$sold->getId();
+        echo \$key, \" \", \$sold->getId(), \" \", \$om->get(\OneTrace\Connector\Model\StoreMcp::class)->key();
     "')
 
-read -r URL_KEY SOLD_ID <<<"$PRODUCTS"
+read -r URL_KEY SOLD_ID MCP_KEY <<<"$PRODUCTS"
 
 check() {
     if ! grep -qF -- "$3" <<<"$2"; then
@@ -66,3 +67,10 @@ SOLD_PAGE=$(curl -fsS "http://localhost:$PORT/$URL_KEY-sold.html")
 docker exec "$NAME" sh -c 'php bin/magento config:set onetrace/parts/notify 1 >/dev/null && php bin/magento cache:flush >/dev/null'
 refute "no notify form when turned off" "$SOLD_PAGE" "data-cdp-notify="
 check "Magento stock alert without the form" "$SOLD_PAGE" "Notify me when this product is in stock"
+
+MCP_INIT='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}'
+MCP_DENIED=$(curl -sS -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -H 'Authorization: Bearer wrong' -d "$MCP_INIT" "http://localhost:$PORT/onetrace/mcp")
+MCP=$(curl -fsS -X POST -H 'Content-Type: application/json' -H "Authorization: Bearer $MCP_KEY" -d "$MCP_INIT" "http://localhost:$PORT/onetrace/mcp")
+
+check "store MCP refuses another key" "$MCP_DENIED" "401"
+check "store MCP contract" "$MCP" '"onetrace/store":{"version":1}'

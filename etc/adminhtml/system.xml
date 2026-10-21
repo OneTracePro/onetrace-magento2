@@ -121,6 +121,54 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
             </group>
+            <group id="store_mcp" translate="label comment" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>AI chat bot: store MCP</label>
+                <comment>The AI bot of the OneTrace chat answers customers with live store data — order status, tracking, stock, shipping, returns — and, if you allow it, cancels unpaid orders and passes return and delivery change requests to the staff. Customers are confirmed by the login on the storefront or by a code the store sends by email. The secret key needs the chats.manage permission; the AI chat of the project is paid from its balance.</comment>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Connect to the chat bot</label>
+                    <comment>Saving connects the store to the bot of the project (Chats → Chat settings → Bot → Store MCP).</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="tools" translate="label comment" type="multiselect" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>What the bot may do</label>
+                    <comment>Actions run only after the customer clearly agrees in the chat; the bot cancels only orders with nothing paid.</comment>
+                    <source_model>OneTrace\Connector\Model\Source\StoreMcpTools</source_model>
+                    <can_be_empty>1</can_be_empty>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+                <field id="return_page" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Return policy page</label>
+                    <comment>The CMS page the bot reads the return policy from.</comment>
+                    <source_model>OneTrace\Connector\Model\Source\CmsPages</source_model>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+                <field id="code_identity" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Confirmation code email sender</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Identity</source_model>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+                <field id="code_template" translate="label comment" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Confirmation code email template</label>
+                    <comment>An observer of the onetrace_store_mcp_send_code event can send the code itself, e.g. by SMS.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+                <field id="request_identity" translate="label comment" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Requests to the staff</label>
+                    <comment>Return and delivery change requests go to this store email address and to the order comments.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Identity</source_model>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+                <field id="request_template" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Request email template</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+                <field id="state" translate="label" type="label" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>State</label>
+                    <frontend_model>OneTrace\Connector\Block\Adminhtml\StoreMcpStatus</frontend_model>
+                </field>
+            </group>
             <group id="promo" translate="label comment" sortOrder="50" showInDefault="1">
                 <label>Promo codes</label>
                 <comment>Unique codes of OneTrace promo code pools become coupons of cart price rules every 5 minutes, one use each with the expiry of the code. The rule needs the "Specific Coupon" type with "Use Auto Generation".</comment>

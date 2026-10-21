@@ -28,6 +28,15 @@
                 <cart/>
                 <push>0</push>
             </widgets>
+            <store_mcp>
+                <enabled>0</enabled>
+                <tools>store_start_verification,store_verify,store_get_customer,store_find_orders,store_get_order,store_get_tracking,store_check_availability,store_get_delivery_options,store_get_return_policy</tools>
+                <return_page/>
+                <code_identity>general</code_identity>
+                <code_template>onetrace_store_mcp_code_template</code_template>
+                <request_identity>sales</request_identity>
+                <request_template>onetrace_store_mcp_request_template</request_template>
+            </store_mcp>
             <promo>
                 <pools/>
             </promo>

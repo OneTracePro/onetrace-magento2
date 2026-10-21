@@ -2,6 +2,13 @@
 
 All notable changes are documented here. The project follows [Semantic Versioning](https://semver.org/).
 
+## 1.8.0 — 2026-10-22
+
+- MCP server of the store for the OneTrace AI chat bot (store MCP contract v1, onetrace-php 1.13): `POST /onetrace/mcp` of a store view, connected to the bot of the project when the settings are saved (**AI chat bot: store MCP**, the secret key needs `chats.manage`; store views of one project and website share one connection, turning it off disconnects it). The platform key and the token secret are generated once and kept encrypted in flags.
+- Reading tools on by default: orders of the customer (the account and guest orders with its email), an order with items, payment, shipping and the tracking number, tracking, stock with configurable variants, shipping methods, the return policy from a CMS page. Actions off by default: cancel an unpaid order (`new`/`pending_payment`, nothing paid; `cancellableStates` in `di.xml`), return and delivery change requests to the staff (an order comment and an email, once per idempotency key). The owner chooses the tools in "What the bot may do".
+- Customers are confirmed by the login on the storefront (a signed token in the private `onetrace` section → `cdp.chatCustomer()`, tracker 1.16.0) or by a 6-digit code by email (new email templates "OneTrace: chat confirmation code" and "OneTrace: request from the chat"; the `onetrace_store_mcp_send_code` event for SMS). With store emails through OneTrace the code goes as `login_code` (not tracked, redacted after sending); requests to the staff stay in Magento.
+- Requires onetrace-php 1.13, Magento_Cms and Magento_Shipping.
+
 ## 1.7.0 — 2026-10-20
 
 - Store emails through OneTrace (Store emails of the platform, the secret key needs `messages.send`): Magento's emails go through the email integration of the project, with delivery statuses and history in the customer profile. The module is the first plugin of the mail transport (`TransportInterface::sendMessage`: Laminas Mail in 2.4.7, Symfony Mailer in 2.4.8+, before SMTP extensions) and learns the kind of an email and its order from the template of the `TransportBuilder` (custom templates by the template they were made from); the kinds are listed in the README.

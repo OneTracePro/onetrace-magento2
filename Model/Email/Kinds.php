@@ -57,12 +57,15 @@ class Kinds
         'sendfriend_email_template' => 'product_shared',
         'catalog_productalert_email_price_template' => 'price_alert',
         'catalog_productalert_email_stock_template' => 'stock_alert',
+        // The confirmation code of the store MCP server for the AI chat bot.
+        'onetrace_store_mcp_code_template' => 'login_code',
         // Notifications to the store staff: always sent by Magento (see StoreEmails).
         'contact_email_email_template' => 'admin_contact_form',
         'checkout_payment_failed_template' => 'admin_payment_failed',
         'catalog_productalert_cron_error_email_template' => 'admin_product_alert_error',
         'sitemap_generate_error_email_template' => 'admin_sitemap_error',
         'currency_import_error_email_template' => 'admin_currency_import_error',
+        'onetrace_store_mcp_request_template' => 'admin_chat_request',
     ];
 
     /** Order emails: the order comes in the template variables. */
