@@ -2,6 +2,10 @@
 
 All notable changes are documented here. The project follows [Semantic Versioning](https://semver.org/).
 
+## 1.9.0 — 2026-10-22
+
+- My Account → Communication preferences (`onetrace/preferences`, setting **What to send → Communication preferences in My Account**, off by default): the OneTrace preference center inside the store (onetrace-php 1.14) — subscription topics of the project by channel with the channel names in the store language, the frequency of marketing messages (as they come, weekly, monthly), a pause for 30 or 90 days or resuming, "Unsubscribe from everything". Saving sends every topic of the form in every channel that can change, so an unticked box unsubscribes; blocked channels are read only; a customer the platform does not know yet sees that nothing is sent. The key check warns when the secret key has no `profiles.read` and `profiles.write`. Magento's own Newsletter Subscriptions page stays and keeps sending its consent.
+
 ## 1.8.0 — 2026-10-22
 
 - MCP server of the store for the OneTrace AI chat bot (store MCP contract v1, onetrace-php 1.13): `POST /onetrace/mcp` of a store view, connected to the bot of the project when the settings are saved (**AI chat bot: store MCP**, the secret key needs `chats.manage`; store views of one project and website share one connection, turning it off disconnects it). The platform key and the token secret are generated once and kept encrypted in flags.

@@ -16,7 +16,7 @@ use OneTrace\Commerce\Messages;
  */
 class Connection
 {
-    public const VERSION = '1.8.0';
+    public const VERSION = '1.9.0';
 
     /** @var array<string, Client> */
     private array $clients = [];

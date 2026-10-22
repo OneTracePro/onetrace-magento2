@@ -2,6 +2,13 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceBlock name="customer_account_navigation">
+            <block class="Magento\Customer\Block\Account\SortLink" name="onetrace-preferences-link" ifconfig="onetrace/parts/preferences">
+                <arguments>
+                    <argument name="path" xsi:type="string">onetrace/preferences</argument>
+                    <argument name="label" xsi:type="string" translate="true">Communication preferences</argument>
+                    <argument name="sortOrder" xsi:type="number">45</argument>
+                </arguments>
+            </block>
             <block class="Magento\Customer\Block\Account\SortLink" name="onetrace-loyalty-link" ifconfig="onetrace/parts/loyalty">
                 <arguments>
                     <argument name="path" xsi:type="string">onetrace/loyalty</argument>

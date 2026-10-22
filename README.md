@@ -114,6 +114,10 @@ Turn on **Product search** in the settings (the plan of the project must include
 - A query with a redirect rule (Site → Search of the platform, e.g. "delivery" → the delivery page) opens the rule's page instead of the results. The full page cache does not store redirects, but a popular query cached before its rule was added shows the cached results until the cache is refreshed.
 - Filters by other attributes, sorting by name and any error of the platform keep Magento's own search. The layered navigation counts come from Magento's search.
 
+## Communication preferences in My Account
+
+Turn on **Stores → Configuration → OneTrace → What to send → Communication preferences in My Account** (the secret key needs the `profiles.read` and `profiles.write` permissions). **My Account → Communication preferences** shows the OneTrace preference center inside the store: the subscription topics of the project (set up in **Messaging rules → Subscription topics** of the platform) by the channels the customer gets messages in, how often marketing messages come (as they come, at most once a week or a month), a pause for 30 or 90 days and "Unsubscribe from everything". Messages about orders and the account keep coming. Magento's own **Newsletter Subscriptions** page stays: it subscribes to or unsubscribes from the email channel (or the topic of **Newsletter consent**).
+
 ## Bonus points
 
 Turn on **Stores → Configuration → OneTrace → What to send → Bonus points**; the program itself (earning, tiers, the share of an order payable with points) is set up in the **Loyalty** section of the platform, and the secret key needs the `loyalty.read` and `loyalty.write` permissions.

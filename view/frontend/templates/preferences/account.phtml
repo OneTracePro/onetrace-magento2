@@ -1,0 +1,83 @@
+<?php
+/** @var \OneTrace\Connector\Block\Preferences\Account $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$channels = $block->channels();
+$topics = $block->topics();
+?>
+<?php if ($block->state() === false): ?>
+    <div class="message info"><span><?= $escaper->escapeHtml(__('Communication preferences are not available right now. Please try again later.')) ?></span></div>
+<?php elseif ($channels === [] || $topics === []): ?>
+    <p><?= $escaper->escapeHtml(__('We do not send you newsletters yet.')) ?></p>
+<?php else: ?>
+    <form method="post" action="<?= $escaper->escapeUrl($block->saveUrl()) ?>" class="form onetrace-preferences">
+        <?= $block->getBlockHtml('formkey') ?>
+        <p><?= $escaper->escapeHtml(__('Choose what we send you and where. Messages about your orders and your account come anyway.')) ?></p>
+        <div class="table-wrapper">
+            <table class="data table onetrace-preferences-topics">
+                <thead>
+                    <tr>
+                        <th scope="col"></th>
+                        <?php foreach ($channels as $channel): ?>
+                            <th scope="col" style="text-align:center"><?= $escaper->escapeHtml($channel['name']) ?></th>
+                        <?php endforeach; ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($topics as $topic): ?>
+                        <tr>
+                            <td>
+                                <?= $escaper->escapeHtml($topic['name']) ?>
+                                <?php if ($topic['description'] !== ''): ?><br><small><?= $escaper->escapeHtml($topic['description']) ?></small><?php endif; ?>
+                            </td>
+                            <?php foreach ($channels as $channel): ?>
+                                <?php $subscribed = $topic['channels'][$channel['key']] ?? null; ?>
+                                <td style="text-align:center">
+                                    <?php if ($subscribed === null): ?>
+                                        —
+                                    <?php else: ?>
+                                        <input type="checkbox" name="topics[<?= $escaper->escapeHtmlAttr($topic['key']) ?>][<?= $escaper->escapeHtmlAttr($channel['key']) ?>]" value="1"
+                                               aria-label="<?= $escaper->escapeHtmlAttr($topic['name'] . ' · ' . $channel['name']) ?>"
+                                               <?= $subscribed ? 'checked' : '' ?> <?= $channel['blocked'] ? 'disabled' : '' ?>>
+                                    <?php endif; ?>
+                                </td>
+                            <?php endforeach; ?>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php if (in_array(true, array_column($channels, 'blocked'), true)): ?>
+            <p><small><?= $escaper->escapeHtml(__('Some channels cannot be changed: the address does not receive messages.')) ?></small></p>
+        <?php endif; ?>
+        <fieldset class="fieldset">
+            <div class="field">
+                <label class="label" for="onetrace-frequency"><span><?= $escaper->escapeHtml(__('How often')) ?></span></label>
+                <div class="control">
+                    <select name="frequency" id="onetrace-frequency">
+                        <?php foreach (['default' => __('As they come'), 'weekly' => __('At most once a week'), 'monthly' => __('At most once a month')] as $value => $label): ?>
+                            <option value="<?= $escaper->escapeHtmlAttr($value) ?>" <?= $block->frequency() === $value ? 'selected' : '' ?>><?= $escaper->escapeHtml($label) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="onetrace-pause"><span><?= $escaper->escapeHtml(__('Pause')) ?></span></label>
+                <div class="control">
+                    <select name="pause" id="onetrace-pause">
+                        <?php foreach ($block->pauses() as $value => $label): ?>
+                            <option value="<?= $escaper->escapeHtmlAttr($value) ?>"><?= $escaper->escapeHtml($label) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+        </fieldset>
+        <div class="actions-toolbar">
+            <div class="primary">
+                <button type="submit" class="action save primary" name="onetrace_action" value="save"><span><?= $escaper->escapeHtml(__('Save')) ?></span></button>
+            </div>
+            <div class="secondary">
+                <button type="submit" class="action secondary" name="onetrace_action" value="all"><span><?= $escaper->escapeHtml(__('Unsubscribe from everything')) ?></span></button>
+            </div>
+        </div>
+    </form>
+<?php endif; ?>

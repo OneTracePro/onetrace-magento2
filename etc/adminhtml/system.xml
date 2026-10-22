@@ -82,6 +82,11 @@
                     <comment>Subscribing and unsubscribing in the store (registration, account, footer form) become consents in OneTrace.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="preferences" translate="label comment" type="select" sortOrder="65" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Communication preferences in My Account</label>
+                    <comment>My Account → Communication preferences: subscription topics by channel, frequency, a pause and unsubscribing from everything, as in the OneTrace preference center. Topics are set up in Messaging rules → Subscription topics of the platform. The secret key needs the profiles.read and profiles.write permissions.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <field id="loyalty" translate="label comment" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Bonus points</label>
                     <comment>The loyalty program of the platform: signed-in customers pay for part of the order with points in the cart and at checkout and see their points in My Account → Bonus points. The secret key needs the loyalty.read and loyalty.write permissions.</comment>

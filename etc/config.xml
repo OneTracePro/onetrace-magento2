@@ -15,6 +15,7 @@
                 <cart>1</cart>
                 <catalog>1</catalog>
                 <newsletter>1</newsletter>
+                <preferences>0</preferences>
                 <search>0</search>
                 <loyalty>0</loyalty>
                 <referral_field>0</referral_field>
