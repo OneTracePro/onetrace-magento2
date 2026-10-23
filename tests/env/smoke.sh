@@ -2,7 +2,8 @@
 # Storefront check over HTTP after tests/env/run.sh: the tracker in <head>, product_viewed with the product widget
 # on a product page, /cdp-sw.js from the store root, the search box suggestions and the store search when the
 # platform does not answer, the "Notify when available" form instead of Magento's stock alert on a sold-out product,
-# the store MCP server at /onetrace/mcp (a POST without a form key, the platform key only).
+# the store MCP server at /onetrace/mcp (a POST without a form key, the platform key only), "Add to cart" of the
+# OneTrace search widget at /onetrace/cart/add (the form key from the cookie, as the widget sends it).
 set -euo pipefail
 TAG="${MAGENTO_TAG:-php84-fpm-magento2.4.8-p5}"
 NAME="onetrace-m2-${TAG//./-}"
@@ -19,13 +20,13 @@ PRODUCTS=$(docker exec "$NAME" sh -c '
         \$om->get(\Magento\Framework\App\State::class)->setAreaCode(\"adminhtml\");
         \$key = \"smoke-\" . bin2hex(random_bytes(3));
         \$p = \$om->create(\Magento\Catalog\Api\Data\ProductInterface::class)->setTypeId(\"simple\")->setAttributeSetId(4)->setSku(\$key)->setUrlKey(\$key)->setName(\"Smoke\")->setPrice(10)->setVisibility(4)->setStatus(1)->setWebsiteIds([1])->setStockData([\"qty\" => 5, \"is_in_stock\" => 1]);
-        \$om->get(\Magento\Catalog\Api\ProductRepositoryInterface::class)->save(\$p);
+        \$p = \$om->get(\Magento\Catalog\Api\ProductRepositoryInterface::class)->save(\$p);
         \$sold = \$om->create(\Magento\Catalog\Api\Data\ProductInterface::class)->setTypeId(\"simple\")->setAttributeSetId(4)->setSku(\$key . \"-sold\")->setUrlKey(\$key . \"-sold\")->setName(\"Smoke sold out\")->setPrice(10)->setVisibility(4)->setStatus(1)->setWebsiteIds([1])->setStockData([\"use_config_manage_stock\" => 1, \"qty\" => 0, \"is_in_stock\" => 0]);
         \$sold = \$om->get(\Magento\Catalog\Api\ProductRepositoryInterface::class)->save(\$sold);
-        echo \$key, \" \", \$sold->getId(), \" \", \$om->get(\OneTrace\Connector\Model\StoreMcp::class)->key();
+        echo \$key, \" \", \$sold->getId(), \" \", \$om->get(\OneTrace\Connector\Model\StoreMcp::class)->key(), \" \", \$p->getId();
     "')
 
-read -r URL_KEY SOLD_ID MCP_KEY <<<"$PRODUCTS"
+read -r URL_KEY SOLD_ID MCP_KEY PRODUCT_ID <<<"$PRODUCTS"
 
 check() {
     if ! grep -qF -- "$3" <<<"$2"; then
@@ -74,3 +75,14 @@ MCP=$(curl -fsS -X POST -H 'Content-Type: application/json' -H "Authorization: B
 
 check "store MCP refuses another key" "$MCP_DENIED" "401"
 check "store MCP contract" "$MCP" '"onetrace/store":{"version":1}'
+
+CART_URL="http://localhost:$PORT/onetrace/cart/add/id/$PRODUCT_ID"
+CART_DENIED=$(curl -sS -o /dev/null -w '%{http_code}' -X POST -b 'form_key=smokeFormKey0001' -d 'quantity=1&form_key=smokeFormKey0001' "$CART_URL")
+CART_FORM_KEY=$(curl -sS -o /dev/null -w '%{http_code}' -X POST -H 'X-Requested-With: XMLHttpRequest' -d 'quantity=1&form_key=smokeFormKey0001' "$CART_URL")
+CART=$(curl -fsS -X POST -H 'X-Requested-With: XMLHttpRequest' -b 'form_key=smokeFormKey0001' -d 'quantity=2&form_key=smokeFormKey0001' "$CART_URL")
+CART_SOLD=$(curl -fsS -X POST -H 'X-Requested-With: XMLHttpRequest' -b 'form_key=smokeFormKey0001' -d 'quantity=1&form_key=smokeFormKey0001' "http://localhost:$PORT/onetrace/cart/add/id/$SOLD_ID")
+
+check "cart of the search widget refuses a request without X-Requested-With" "$CART_DENIED" "400"
+check "cart of the search widget checks the form key" "$CART_FORM_KEY" "403"
+check "cart of the search widget adds a product" "$CART" '{"ok":true,"count":2}'
+check "cart of the search widget sends a sold-out product to its page" "$CART_SOLD" "\"redirect\":\"http:\\/\\/localhost:$PORT\\/$URL_KEY-sold.html\""

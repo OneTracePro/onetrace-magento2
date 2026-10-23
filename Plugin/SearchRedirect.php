@@ -10,12 +10,13 @@ use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Store\Model\StoreManagerInterface;
 use OneTrace\Connector\Model\Config;
 use OneTrace\Connector\Model\Connection;
+use OneTrace\Connector\Model\SearchWidget;
 use Psr\Log\LoggerInterface;
 
 /**
  * Redirect rules of the platform (Site → Search, e.g. "delivery" → the delivery page) on the quick search results page:
  * before the page is built, a short suggestion request tells whether the query has a redirect. No rule, a later page
- * of the results or any API error — the page is built as usual.
+ * of the results or any API error — the page is built as usual. The OneTrace search widget follows the rules itself.
  */
 class SearchRedirect
 {
@@ -26,6 +27,7 @@ class SearchRedirect
         private readonly RequestInterface $request,
         private readonly RedirectFactory $redirects,
         private readonly LoggerInterface $logger,
+        private readonly SearchWidget $searchWidget,
     ) {
     }
 
@@ -41,7 +43,7 @@ class SearchRedirect
         $storeId = (int) $this->storeManager->getStore()->getId();
         $text = trim((string) $this->request->getParam('q'));
 
-        if ($text === '' || (int) $this->request->getParam('p', 1) > 1 || !$this->config->storefront($storeId) || !$this->config->enabled('search', $storeId)) {
+        if ($text === '' || (int) $this->request->getParam('p', 1) > 1 || !$this->config->storefront($storeId) || !$this->config->enabled('search', $storeId) || $this->searchWidget->active($storeId)) {
             return null;
         }
 

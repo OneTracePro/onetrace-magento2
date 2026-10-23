@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!-- The quick search results page with the OneTrace search widget (added by Observer\SearchWidgetPage): the tracker
+     draws the products, facets and sorting, Magento's product list and layered navigation are not built. -->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="search.result" remove="true"/>
+        <referenceBlock name="catalogsearch.leftnav" remove="true"/>
+        <referenceContainer name="content">
+            <block class="OneTrace\Connector\Block\SearchResults" name="onetrace.search.results"/>
+        </referenceContainer>
+    </body>
+</page>

@@ -127,6 +127,18 @@ final class SearchTest extends TestCase
         self::assertCount(1, $this->urls, 'Only the first search asked the platform.');
     }
 
+    public function testKeepsMagentosSearchOverTheMonthlySearchLimit(): void
+    {
+        $dress = $this->product(['name' => 'Onetrace Quota Dress ' . bin2hex(random_bytes(3))]);
+        $this->respond(402, ['message' => 'The monthly search limit of the plan is reached.', 'code' => 'quota_exceeded']);
+
+        self::assertContains((int) $dress->getId(), self::ids($this->search(['search_term' => (string) $dress->getName()])));
+        self::assertCount(1, $this->urls, 'Asked once, no retries.');
+
+        $this->flush();
+        self::assertCount(0, $this->platform->events('search'), 'Magento\'s results are not counted as a platform search.');
+    }
+
     /**
      * The results page controller through the redirect plugin: the redirect URL, or null when the page is built.
      *

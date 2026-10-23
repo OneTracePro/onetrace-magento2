@@ -8,6 +8,7 @@ use Magento\Cookie\Helper\Cookie as CookieHelper;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use OneTrace\Connector\Model\Config;
+use OneTrace\Connector\Model\SearchWidget;
 
 /**
  * The tracker in <head>: the same for every visitor, so it is cached with the page; the signed-in customer comes
@@ -22,6 +23,7 @@ class Tracker extends Template
         Context $context,
         private readonly Config $config,
         private readonly CookieHelper $cookieHelper,
+        private readonly SearchWidget $searchWidget,
         array $data = [],
     ) {
         parent::__construct($context, $data);
@@ -35,13 +37,14 @@ class Tracker extends Template
     }
 
     /**
-     * Suggestions of the tracker in the store search box ("Product search" setting).
+     * Suggestions of the tracker in the store search box ("Product search" setting), or the search layer of the
+     * OneTrace search widget ("OneTrace search widget" setting, the widget is on in OneTrace).
      */
     public function searchEnabled(): bool
     {
         $storeId = (int) $this->_storeManager->getStore()->getId();
 
-        return $this->enabled() && $this->config->enabled('search', $storeId);
+        return $this->enabled() && ($this->config->enabled('search', $storeId) || $this->searchWidget->active($storeId));
     }
 
     /** Category link of the suggestions: {id} is replaced with the category id of the catalog. */

@@ -43,6 +43,8 @@ Cart,Cart
 "Widget id","Widget id"
 "Product search","Product search"
 "Search results and suggestions while typing from OneTrace: word forms, typos, the wrong keyboard layout and the visitor's interests. On any error the store search runs as usual. The plan of the project must include product search.","Search results and suggestions while typing from OneTrace: word forms, typos, the wrong keyboard layout and the visitor's interests. On any error the store search runs as usual. The plan of the project must include product search."
+"OneTrace search widget","OneTrace search widget"
+"The tracker draws the search layer under the search box and the whole search results page — products, filters, sorting, endless scrolling and ""Add to cart"" — instead of Magento's results and layered navigation, when the search widget is on in Site → Search of the platform (checked every 10 minutes). Otherwise, and on any error, the store search page stays as it is. The plan of the project must include product search.","The tracker draws the search layer under the search box and the whole search results page — products, filters, sorting, endless scrolling and ""Add to cart"" — instead of Magento's results and layered navigation, when the search widget is on in Site → Search of the platform (checked every 10 minutes). Otherwise, and on any error, the store search page stays as it is. The plan of the project must include product search."
 "%1 (until %2)","%1 (until %2)"
 "Adjustment","Adjustment"
 "Available","Available"

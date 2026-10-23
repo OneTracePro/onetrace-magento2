@@ -1,0 +1,9 @@
+<?php
+/** @var \OneTrace\Connector\Block\SearchResults $block */
+/** @var \Magento\Framework\Escaper $escaper */
+/** @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer */
+// After "Add to cart" of the widget the mini cart of the theme loads the cart section again.
+$script = "window.addEventListener('cdp:add-to-cart',function(){require(['Magento_Customer/js/customer-data'],function(d){d.reload(['cart'],true)})});";
+?>
+<div data-cdp-search-results data-query-param="<?= $escaper->escapeHtmlAttr($block->queryParam()) ?>" data-cart-url="<?= $escaper->escapeUrl($block->cartUrl()) ?>"></div>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $script, false) ?>

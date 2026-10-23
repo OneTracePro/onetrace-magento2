@@ -14,13 +14,15 @@ use OneTrace\Commerce\Customer;
 use OneTrace\Connector\Model\Config;
 use OneTrace\Connector\Model\Connection;
 use OneTrace\Connector\Model\Queue;
+use OneTrace\Connector\Model\SearchWidget;
 use Psr\Log\LoggerInterface;
 
 /**
  * Product search of the store from OneTrace ("Product search" setting): the quick search of the storefront keeps
  * Magento's results page and layered navigation, but its products, their order and their number come from the
  * platform (word forms, typos, the wrong keyboard layout, the visitor's interests). Filters by other attributes,
- * sorting by name and any API error keep Magento's own search.
+ * sorting by name and any API error keep Magento's own search. With the OneTrace search widget the tracker draws the
+ * results page and sends the search event itself: the platform is not asked here.
  */
 class Search
 {
@@ -42,6 +44,7 @@ class Search
         private readonly CustomerSession $session,
         private readonly DocumentFactory $documents,
         private readonly LoggerInterface $logger,
+        private readonly SearchWidget $searchWidget,
     ) {
     }
 
@@ -51,7 +54,7 @@ class Search
         $native = $proceed($criteria);
         $storeId = (int) $this->storeManager->getStore()->getId();
 
-        if ($criteria->getRequestName() !== self::REQUEST || !$this->config->storefront($storeId) || !$this->config->enabled('search', $storeId)) {
+        if ($criteria->getRequestName() !== self::REQUEST || !$this->config->storefront($storeId) || !$this->config->enabled('search', $storeId) || $this->searchWidget->active($storeId)) {
             return $native;
         }
 

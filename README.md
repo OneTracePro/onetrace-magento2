@@ -27,7 +27,7 @@ Connects a Magento 2 / Adobe Commerce store to [OneTrace.pro](https://onetrace.p
 | `add_to_wishlist`, `remove_from_wishlist` | Magento's wishlist: adding, removing, moving to the cart (storefront, GraphQL, admin) | server |
 | `product_viewed`, page views | the storefront | browser tracker, works with the full page cache and Varnish |
 | Product catalog with stock | product and stock changes (orders, cancellations, refunds, stock and source items), daily, and the "Upload the whole catalog" button | server, `products.write` |
-| `search` | the first page of the store search results, with "Product search" on | server |
+| `search` | the first page of the store search results, with "Product search" on | server; with the OneTrace search widget — the tracker |
 
 Guest orders without the tracker cookie are linked by email; later events of an order (invoice, refund) use the browser of its checkout, so everything lands in one profile.
 
@@ -113,6 +113,16 @@ Turn on **Product search** in the settings (the plan of the project must include
 - The search box shows suggestions of the tracker while typing: popular queries, categories and products with pictures and prices.
 - A query with a redirect rule (Site → Search of the platform, e.g. "delivery" → the delivery page) opens the rule's page instead of the results. The full page cache does not store redirects, but a popular query cached before its rule was added shows the cached results until the cache is refreshed.
 - Filters by other attributes, sorting by name and any error of the platform keep Magento's own search. The layered navigation counts come from Magento's search.
+- Over the monthly search limit of the plan (402 `quota_exceeded`) the store search runs as usual until the limit frees up.
+
+### OneTrace search widget
+
+Turn on **What to send → OneTrace search widget** and the search widget in **Site → Search** of the platform (the tracker must be on). The module asks the platform whether the widget is on (kept in the Magento cache for 10 minutes; saving the settings reads it again), and then:
+
+- The quick search results page shows `<div data-cdp-search-results data-query-param="q" data-cart-url="…/onetrace/cart/add/id/{id}/">` in one column instead of Magento's product list and layered navigation (the `onetrace_search_widget` layout handle — a theme can change it). The tracker draws the products, filters, sorting, endless scrolling and "Add to cart" with the settings of the widget, follows the redirect rules and sends the `search` event; the server does not call the search API.
+- The search box shows the search layer of the tracker under it, also without **Product search**.
+- "Add to cart" posts to `/onetrace/cart/add/id/{id}` with the form key: simple and virtual products without required options go to the cart (Magento's stock and quantity checks, cart events) and the mini cart reloads; products with a choice (configurable, bundle, grouped, required custom options) or that cannot be bought open their page.
+- While the setting is on, the full page cache keeps results pages no longer than 10 minutes, so turning the widget on or off in OneTrace reaches cached pages. The widget off in OneTrace or any error of the platform keeps the results page described above.
 
 ## Communication preferences in My Account
 

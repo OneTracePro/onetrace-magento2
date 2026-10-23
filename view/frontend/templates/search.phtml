@@ -4,7 +4,8 @@
 if (!$block->searchEnabled()) {
     return;
 }
-// The store search box gets the suggestions of the tracker instead of Magento's autocomplete.
+// The store search box gets the suggestions (or the search layer of the widget) of the tracker instead of Magento's
+// autocomplete.
 $script = sprintf(
     "(function(d,url){var i=d.querySelector('#search_mini_form input[name=q]');if(!i)return;i.setAttribute('data-cdp-search','');i.setAttribute('data-category-url',url);"
     . "var s=d.createElement('style');s.textContent='#search_mini_form .search-autocomplete{display:none!important}';d.head.appendChild(s);window.cdp&&cdp.searchBoxes&&cdp.searchBoxes()})(document,%s);",

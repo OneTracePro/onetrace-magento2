@@ -103,6 +103,11 @@
                     <comment>Search results and suggestions while typing from OneTrace: word forms, typos, the wrong keyboard layout and the visitor's interests. On any error the store search runs as usual. The plan of the project must include product search.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="search_widget" translate="label comment" type="select" sortOrder="75" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>OneTrace search widget</label>
+                    <comment>The tracker draws the search layer under the search box and the whole search results page — products, filters, sorting, endless scrolling and "Add to cart" — instead of Magento's results and layered navigation, when the search widget is on in Site → Search of the platform (checked every 10 minutes). Otherwise, and on any error, the store search page stays as it is. The plan of the project must include product search.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
             </group>
             <group id="consent" translate="label" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Newsletter consent</label>

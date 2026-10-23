@@ -13,4 +13,8 @@
     <action name="customer/ajax/login">
         <section name="onetrace"/>
     </action>
+    <!-- "Add to cart" of the OneTrace search widget. -->
+    <action name="onetrace/cart/add">
+        <section name="cart"/>
+    </action>
 </config>
