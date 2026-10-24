@@ -6,6 +6,7 @@
         </referenceContainer>
         <referenceContainer name="product.info.main">
             <block class="OneTrace\Connector\Block\Notify" name="onetrace.notify" after="alert.urls"/>
+            <block class="OneTrace\Connector\Block\ProductQuestions" name="onetrace.product.questions" after="product.info"/>
         </referenceContainer>
         <referenceContainer name="content.aside">
             <block class="OneTrace\Connector\Block\Widget" name="onetrace.widget.product" before="-">

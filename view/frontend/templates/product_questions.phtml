@@ -1,0 +1,9 @@
+<?php
+/** @var \OneTrace\Connector\Block\ProductQuestions $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$productId = $block->productId();
+if ($productId === null) {
+    return;
+}
+?>
+<div data-cdp-ask data-product-id="<?= $escaper->escapeHtmlAttr($productId) ?>"></div>

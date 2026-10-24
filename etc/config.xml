@@ -21,6 +21,7 @@
                 <loyalty>0</loyalty>
                 <referral_field>0</referral_field>
                 <notify>1</notify>
+                <product_questions>1</product_questions>
             </parts>
             <consent>
                 <topic/>

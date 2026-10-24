@@ -103,7 +103,13 @@ Emails with access links (`password_reset`, `account_new`, `email_verification`,
 
 ## Languages of the catalog
 
-The catalog of a project comes from its first store view. Other store views connected to the same project (the same address and secret key) with another locale (**Stores → Configuration → General → Locale Options**) add translations: product names, their links in that store view, category names and the values of visible attributes. The platform shows recommendations, widgets, search results and emails in the visitor's language.
+The catalog of a project comes from its first store view. Other store views connected to the same project (the same address and secret key) with another locale (**Stores → Configuration → General → Locale Options**) add translations: product names, their links in that store view, descriptions, category names and the values of visible attributes. The platform shows recommendations, widgets, search results and emails in the visitor's language.
+
+## Ask AI about a product
+
+Catalog items carry the product **Description** of the store view (or the **Short Description** when it is empty): Magento directives (`{{widget}}`, `{{media}}`), styles and scripts of Page Builder are removed, the HTML becomes text of at most 5000 characters. OneTrace AI answers shoppers' questions on the product page from it, the attributes and the knowledge base of the shop.
+
+With **What to send → Show "Ask AI about this product" on product pages** (on by default) the product page gets `<div data-cdp-ask data-product-id="{product id}">` under the "Add to cart" form (`onetrace.product.questions` in `product.info.main`, after `product.info`; the id of a configurable product is the parent's, as in the events). The tracker draws the widget there only when it is on in **Site → Product questions** of the platform: a box with suggested questions and answers with sources, or a button that opens the OneTrace chat about the product. Otherwise the element stays empty. The AI is paid from the balance of the project.
 
 ## Product search
 

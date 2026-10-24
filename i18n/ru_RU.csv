@@ -26,7 +26,7 @@
 "Cart","Корзина"
 "Adding to and removing from the cart and the wishlist, opening the checkout — for abandoned cart, price drop and back in stock journeys.","Добавление в корзину и избранное и удаление из них, переход к оформлению — для цепочек брошенной корзины, снижения цены и поступления в продажу."
 "Product catalog","Каталог товаров"
-"Products with their stock and categories for recommendations and emails, updated when products or their stock change and daily.","Товары с остатками и категории для рекомендаций и писем: при изменении товаров и остатков и раз в сутки."
+"Products with their stock, categories and descriptions for recommendations, emails and AI answers about products, updated when products or their stock change and daily.","Товары с остатками, категориями и описаниями для рекомендаций, писем и ответов ИИ о товарах: при изменении товаров и остатков и раз в сутки."
 "Newsletter subscriptions","Подписки на рассылку"
 "Subscribing and unsubscribing in the store (registration, account, footer form) become consents in OneTrace.","Подписка и отписка в магазине (регистрация, личный кабинет, форма в подвале) становятся согласиями в OneTrace."
 "Newsletter consent","Согласие на рассылку"
@@ -101,6 +101,8 @@ Your promo codes,Ваши промокоды
 valid until %1,действует до %1
 "Show the “Notify when available” form","Показывать форму «Сообщить о поступлении»"
 "On the page of a product that cannot be bought — the form of the “Notify when available” kind from Site → Forms of the platform, drawn by the tracker; Magento's own “Notify me when this product is in stock” link is hidden then. A journey with the Catalog → “back in stock” trigger sends the notification.","На странице товара, который нельзя купить, — форма вида «Сообщить о поступлении» из раздела «Сайт → Формы» платформы (её рисует трекер); своя ссылка Magento «Сообщить о поступлении товара» при этом скрывается. Уведомление отправляет цепочка с триггером «Каталог → снова в наличии»."
+"Show “Ask AI about this product” on product pages","Показывать «Спросить ИИ о товаре» на странице товара"
+"Under “Add to cart” — the product questions widget from Site → Product questions of the platform, drawn by the tracker: the AI answers shoppers from the product description, attributes and the knowledge base of the shop. It appears only when the widget is on in OneTrace; otherwise nothing is shown. The AI is paid from the balance of the project.","Под кнопкой «В корзину» — виджет вопросов о товаре из раздела «Сайт → Вопрос о товаре» платформы (его рисует трекер): ИИ отвечает покупателям по описанию товара, характеристикам и базе знаний магазина. Виджет появляется, только если он включён в OneTrace; иначе ничего не выводится. ИИ оплачивается с баланса проекта."
 "Delivered order statuses","Статусы доставленного заказа"
 "Magento has no delivery state: an order that moves to one of these statuses is sent once as delivered (order_delivered), e.g. a ""Delivered"" status your shipping extension or staff set. ""Complete"" means invoiced and shipped, not delivered. Nothing selected — not sent.","В Magento нет состояния «доставлен»: заказ, перешедший в один из этих статусов, один раз отправляется как доставленный (order_delivered) — например, статус «Доставлен», который ставит модуль доставки или сотрудник. «Complete» (выполнен) означает «счёт выставлен и отгружен», а не «доставлен». Ничего не выбрано — не отправляется."
 "Store emails","Письма магазина"

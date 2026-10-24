@@ -69,12 +69,17 @@
                 </field>
                 <field id="catalog" translate="label comment" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Product catalog</label>
-                    <comment>Products with their stock and categories for recommendations and emails, updated when products or their stock change and daily.</comment>
+                    <comment>Products with their stock, categories and descriptions for recommendations, emails and AI answers about products, updated when products or their stock change and daily.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="notify" translate="label comment" type="select" sortOrder="55" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Show the “Notify when available” form</label>
                     <comment>On the page of a product that cannot be bought — the form of the “Notify when available” kind from Site → Forms of the platform, drawn by the tracker; Magento's own “Notify me when this product is in stock” link is hidden then. A journey with the Catalog → “back in stock” trigger sends the notification.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="product_questions" translate="label comment" type="select" sortOrder="57" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show “Ask AI about this product” on product pages</label>
+                    <comment>Under “Add to cart” — the product questions widget from Site → Product questions of the platform, drawn by the tracker: the AI answers shoppers from the product description, attributes and the knowledge base of the shop. It appears only when the widget is on in OneTrace; otherwise nothing is shown. The AI is paid from the balance of the project.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="newsletter" translate="label comment" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">

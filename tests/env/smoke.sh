@@ -2,6 +2,7 @@
 # Storefront check over HTTP after tests/env/run.sh: the tracker in <head>, product_viewed with the product widget
 # on a product page, /cdp-sw.js from the store root, the search box suggestions and the store search when the
 # platform does not answer, the "Notify when available" form instead of Magento's stock alert on a sold-out product,
+# the "Ask AI about this product" element after the "Add to cart" form,
 # the store MCP server at /onetrace/mcp (a POST without a form key, the platform key only), "Add to cart" of the
 # OneTrace search widget at /onetrace/cart/add (the form key from the cookie, as the widget sends it).
 set -euo pipefail
@@ -61,12 +62,16 @@ check "store search on platform errors" "$SEARCH_PAGE" "/$URL_KEY.html"
 check "notify form on a sold-out product" "$SOLD_PAGE" "<div data-cdp-notify=\"$SOLD_ID\"></div>"
 refute "no Magento stock alert with the form" "$SOLD_PAGE" "Notify me when this product is in stock"
 refute "no notify form on a product in stock" "$PRODUCT_PAGE" "data-cdp-notify="
+check "ask AI element" "$PRODUCT_PAGE" "<div data-cdp-ask data-product-id=\"$PRODUCT_ID\"></div>"
+check "ask AI element after the Add to cart form" "$(sed -n '/id="product-addtocart-button"/,$p' <<<"$PRODUCT_PAGE")" "data-cdp-ask"
 
-# With the form turned off Magento's own link is back.
-docker exec "$NAME" sh -c 'php bin/magento config:set onetrace/parts/notify 0 >/dev/null && php bin/magento cache:flush >/dev/null'
+# With the form turned off Magento's own link is back; the "Ask AI" element is turned off too.
+docker exec "$NAME" sh -c 'php bin/magento config:set onetrace/parts/notify 0 >/dev/null && php bin/magento config:set onetrace/parts/product_questions 0 >/dev/null && php bin/magento cache:flush >/dev/null'
 SOLD_PAGE=$(curl -fsS "http://localhost:$PORT/$URL_KEY-sold.html")
-docker exec "$NAME" sh -c 'php bin/magento config:set onetrace/parts/notify 1 >/dev/null && php bin/magento cache:flush >/dev/null'
+PRODUCT_PAGE=$(curl -fsS "http://localhost:$PORT/$URL_KEY.html")
+docker exec "$NAME" sh -c 'php bin/magento config:set onetrace/parts/notify 1 >/dev/null && php bin/magento config:set onetrace/parts/product_questions 1 >/dev/null && php bin/magento cache:flush >/dev/null'
 refute "no notify form when turned off" "$SOLD_PAGE" "data-cdp-notify="
+refute "no ask AI element when turned off" "$PRODUCT_PAGE" "data-cdp-ask"
 check "Magento stock alert without the form" "$SOLD_PAGE" "Notify me when this product is in stock"
 
 MCP_INIT='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}'

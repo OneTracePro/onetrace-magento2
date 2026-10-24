@@ -22,6 +22,9 @@ use OneTrace\Commerce\CatalogItem;
  */
 class Catalog
 {
+    /** Attributes of the description for the AI answers on the product page, the first one that has text. */
+    private const DESCRIPTIONS = ['description', 'short_description'];
+
     /** @var array<int, array{id: string, name: string, parent_id?: string}|null> */
     private array $categories = [];
 
@@ -97,7 +100,7 @@ class Catalog
                 ->addStoreFilter($storeId)
                 ->addIdFilter($productIds)
                 // Without addPriceData(): it joins the price index and drops products that are not indexed yet.
-                ->addAttributeToSelect(['name', 'status', 'visibility', 'image', 'price', 'special_price', 'special_from_date', 'special_to_date', 'url_key', 'manufacturer', 'brand', 'tax_class_id'])
+                ->addAttributeToSelect(['name', 'status', 'visibility', 'image', 'price', 'special_price', 'special_from_date', 'special_to_date', 'url_key', 'manufacturer', 'brand', 'tax_class_id', ...self::DESCRIPTIONS])
                 ->addUrlRewrite();
             $this->stock->joinSalability($collection);
             $store = $this->storeManager->getStore($storeId);
@@ -144,7 +147,8 @@ class Catalog
 
     /**
      * Translations of items and categories from another store view of the project: the name, the link of that
-     * store view and the values of visible attributes (under the labels of the main store view), category names.
+     * store view, the description and the values of visible attributes (under the labels of the main store view),
+     * category names.
      * Products not assigned to the website of that store view get no translation.
      *
      * @param list<array<string, mixed>> $items
@@ -166,13 +170,18 @@ class Catalog
                 ->setStoreId($storeId)
                 ->addStoreFilter($storeId)
                 ->addIdFilter(array_map('intval', array_column($items, 'id')))
-                ->addAttributeToSelect(['name', 'url_key'])
+                ->addAttributeToSelect(['name', 'url_key', ...self::DESCRIPTIONS])
                 ->addUrlRewrite();
             $texts = [];
 
             /** @var Product $product */
             foreach ($collection as $product) {
-                $texts[(string) $product->getId()] = [(string) $product->getName(), (string) $product->getProductUrl(), array_map(static fn (array $attribute): string => $attribute[1], $this->attributeValues($product))];
+                $texts[(string) $product->getId()] = [
+                    (string) $product->getName(),
+                    (string) $product->getProductUrl(),
+                    array_map(static fn (array $attribute): string => $attribute[1], $this->attributeValues($product)),
+                    $this->description($product),
+                ];
             }
 
             foreach ($items as $index => $item) {
@@ -180,7 +189,7 @@ class Catalog
                     continue;
                 }
 
-                [$name, $url, $values] = $texts[(string) $item['id']];
+                [$name, $url, $values, $description] = $texts[(string) $item['id']];
                 $params = [];
 
                 foreach ($labels[(string) $item['id']] ?? [] as $code => $label) {
@@ -189,7 +198,14 @@ class Catalog
                     }
                 }
 
-                $items[$index] = CatalogItem::translate($item, $locale, $name !== $item['name'] ? $name : null, $url !== ($item['url'] ?? null) ? $url : null, $params);
+                $items[$index] = CatalogItem::translate(
+                    $item,
+                    $locale,
+                    $name !== $item['name'] ? $name : null,
+                    $url !== ($item['url'] ?? null) ? $url : null,
+                    $params,
+                    $description !== null && CatalogItem::description($description) !== ($item['description'] ?? null) ? $description : null
+                );
             }
 
             foreach ($categories as $index => $category) {
@@ -263,8 +279,33 @@ class Catalog
             $regular > $final ? $regular : null,
             $this->brand($product),
             array_column($attributes, 1, 0),
-            $stock
+            $stock,
+            $this->description($product)
         );
+    }
+
+    /**
+     * The description of the store view, or the short one when it has no text: HTML without Magento directives
+     * ({{widget}}, {{media}}, {{store}}), styles and scripts of Page Builder; the library turns it into text.
+     * The template filter is not used: it renders widgets (product lists, blocks) that are not about the product.
+     */
+    private function description(Product $product): ?string
+    {
+        foreach (self::DESCRIPTIONS as $code) {
+            $html = $product->getData($code);
+
+            if (!is_string($html) || trim($html) === '') {
+                continue;
+            }
+
+            $html = preg_replace(['~<(style|script|template)\b[^>]*>.*?</\1\s*>~is', '~<!--.*?-->~s', '~\{\{.*?\}\}~s'], ' ', $html) ?? '';
+
+            if (CatalogItem::description($html) !== null) {
+                return $html;
+            }
+        }
+
+        return null;
     }
 
     /**

@@ -77,6 +77,12 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
             $product->setCategoryIds($data['category_ids']);
         }
 
+        foreach (['description', 'short_description'] as $code) {
+            if (isset($data[$code])) {
+                $product->setData($code, $data[$code]);
+            }
+        }
+
         return $this->admin(fn () => $this->om->get(ProductRepositoryInterface::class)->save($product));
     }
 

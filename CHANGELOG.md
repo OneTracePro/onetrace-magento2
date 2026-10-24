@@ -2,6 +2,12 @@
 
 All notable changes are documented here. The project follows [Semantic Versioning](https://semver.org/).
 
+## 1.11.0 — 2026-10-24
+
+- Product descriptions in the catalog (onetrace-php 1.16): `description` of catalog items is the **Description** of the store view, or the **Short Description** when it has no text, without Magento directives (`{{widget}}`, `{{media}}`, `{{store}}`), `<style>`/`<script>` of Page Builder and comments; the library turns it into text of at most 5000 characters. Store views of the project in other languages send the translated description. OneTrace AI answers shoppers' questions about the product from it.
+- "Ask AI about this product" (setting **What to send → Show “Ask AI about this product” on product pages**, on by default): the product page gets `<div data-cdp-ask data-product-id="{product id}">` in `product.info.main` after the "Add to cart" form (`product.info`), where the tracker draws the product questions widget when it is on in Site → Product questions of the platform; otherwise the element stays empty.
+- Requires onetrace-php 1.16.
+
 ## 1.10.0 — 2026-10-23
 
 - OneTrace search widget (setting **What to send → OneTrace search widget**, off by default; onetrace-php 1.15): when the search widget is on in Site → Search of the platform (`search()->widget()`, kept in the Magento cache for 10 minutes, a failure for a minute, read again when the settings are saved), the quick search results page has `<div data-cdp-search-results>` in one column instead of Magento's product list and layered navigation (the `onetrace_search_widget` layout handle). The tracker draws the products, filters, sorting, endless scrolling and "Add to cart", follows the redirect rules and sends the `search` event; the module does not call the search API then. The search box gets the search layer of the tracker, also without "Product search". While the setting is on, the full page cache keeps results pages no longer than 10 minutes, so turning the widget on or off in OneTrace reaches cached pages. The widget off or any error — the results page stays as before.

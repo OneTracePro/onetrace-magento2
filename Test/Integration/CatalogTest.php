@@ -50,8 +50,9 @@ final class CatalogTest extends TestCase
         $store = $this->storeView('onetrace_ru', ['general/locale/code' => 'ru_RU', 'web/unsecure/base_link_url' => 'http://localhost/ru/', 'web/secure/base_link_url' => 'http://localhost/ru/']);
         $categories = $this->om->get(CategoryRepositoryInterface::class);
         $category = $this->admin(fn () => $categories->save($this->om->get(CategoryInterfaceFactory::class)->create()->setName('Shoes')->setUrlKey('shoes-' . bin2hex(random_bytes(3)))->setParentId(2)->setIsActive(true)));
-        $product = $this->product(['category_ids' => [(int) $category->getId()]]);
-        $this->om->get(ProductAction::class)->updateAttributes([(int) $product->getId()], ['name' => 'Кроссовки'], $store);
+        $product = $this->product(['category_ids' => [(int) $category->getId()], 'description' => '<p>Soft leather</p>']);
+        $same = $this->product(['description' => '<p>Mesh</p>']);
+        $this->om->get(ProductAction::class)->updateAttributes([(int) $product->getId()], ['name' => 'Кроссовки', 'description' => '<p>Мягкая кожа</p>'], $store);
         $translated = $categories->get((int) $category->getId(), $store);
         $translated->setName('Обувь');
         $translated->getResource()->saveAttribute($translated, 'name');
@@ -59,16 +60,39 @@ final class CatalogTest extends TestCase
         try {
             $this->flush();
             $body = end($this->platform->requests)['body'];
-            $item = $body['items'][0];
+            $item = $this->uploaded((int) $product->getId());
 
             self::assertSame('Sneakers', $item['name'], 'The first store view gives the main language.');
             self::assertSame('Кроссовки', $item['translations']['ru-RU']['name']);
+            self::assertSame('Soft leather', $item['description']);
+            self::assertSame('Мягкая кожа', $item['translations']['ru-RU']['description']);
+            self::assertArrayNotHasKey('description', $this->uploaded((int) $same->getId())['translations']['ru-RU'] ?? [], 'The description of the default scope is not a translation.');
             self::assertStringStartsWith('http://localhost/ru/', $item['translations']['ru-RU']['url']);
             self::assertContains(['id' => (string) $category->getId(), 'name' => 'Shoes', 'translations' => ['ru-RU' => ['name' => 'Обувь']]], $body['categories']);
         } finally {
             $this->deleteStoreView($store);
             $this->admin(fn () => $categories->delete($category));
         }
+    }
+
+    public function testUploadsTheDescriptionAsTextWithoutDirectivesOrTheShortOne(): void
+    {
+        $pageBuilder = $this->product([
+            'description' => '<style>#html-body [data-pb-style=X1]{color:red}</style><div data-content-type="row" data-pb-style="X1">'
+                . '<p>Soft <b>leather</b> &amp; mesh.</p><!-- note -->{{widget type="Magento\\CatalogWidget\\Block\\Product\\ProductsList" products_count="5"}}'
+                . '<p><img src="{{media url="wysiwyg/sole.jpg"}}" alt=""></p><ul><li>Size 42</li><li>Rubber sole</li></ul></div>',
+            'short_description' => '<p>Not used</p>',
+        ]);
+        $empty = $this->product([
+            'description' => '<div data-content-type="row"><style>#html-body [data-pb-style=X2]{margin:0}</style></div>',
+            'short_description' => '<p>Light running shoe</p>',
+        ]);
+        $none = $this->product();
+        $this->flush();
+
+        self::assertSame("Soft leather & mesh.\n• Size 42\n• Rubber sole", $this->uploaded((int) $pageBuilder->getId())['description']);
+        self::assertSame('Light running shoe', $this->uploaded((int) $empty->getId())['description'], 'A description without text falls back to the short one.');
+        self::assertArrayNotHasKey('description', $this->uploaded((int) $none->getId()));
     }
 
     public function testDoesNotUploadProductsHiddenFromTheCatalog(): void
