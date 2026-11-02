@@ -25,6 +25,11 @@
                     <comment>cdp_sk_… with the products.write permission — for orders, customers and the catalog.</comment>
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                 </field>
+                <field id="identity_key" translate="label comment" type="obscure" sortOrder="35" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Identity key</label>
+                    <comment>cdp_ik_… from Site → Connection → Server of the platform — signs the id of the signed-in customer for the tracker, so OneTrace trusts it when the project requires signed user ids.</comment>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
                 <field id="test" translate="label" type="button" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Connection check</label>
                     <frontend_model>OneTrace\Connector\Block\Adminhtml\TestButton</frontend_model>

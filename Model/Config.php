@@ -11,7 +11,7 @@ use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Settings of the module by store view (Stores → Configuration → OneTrace): each store view can send to its own
- * project. The secret key is stored encrypted.
+ * project. The secret and identity keys are stored encrypted.
  */
 class Config
 {
@@ -34,7 +34,18 @@ class Config
 
     public function secretKey(?int $storeId = null): string
     {
-        $stored = trim((string) $this->value('connection/secret_key', $storeId));
+        return $this->encrypted('connection/secret_key', $storeId);
+    }
+
+    /** The identity key of the project (cdp_ik_…): signs the id of the signed-in customer for the tracker. */
+    public function identityKey(?int $storeId = null): string
+    {
+        return $this->encrypted('connection/identity_key', $storeId);
+    }
+
+    private function encrypted(string $path, ?int $storeId): string
+    {
+        $stored = trim((string) $this->value($path, $storeId));
 
         // Magento decrypts the field itself (backend_model in config.xml); a value set elsewhere may still be encrypted.
         return preg_match('/^\d+:\d+:/', $stored) === 1 ? trim($this->encryptor->decrypt($stored)) : $stored;

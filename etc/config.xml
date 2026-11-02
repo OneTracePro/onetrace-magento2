@@ -6,6 +6,7 @@
                 <url/>
                 <write_key/>
                 <secret_key backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
+                <identity_key backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
             </connection>
             <parts>
                 <tracker>1</tracker>

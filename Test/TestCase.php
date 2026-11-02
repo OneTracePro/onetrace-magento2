@@ -42,7 +42,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         $this->om = $GLOBALS['onetraceObjectManager'];
         $writer = $this->om->get(ConfigWriter::class);
 
-        foreach (static::SETTINGS + ['onetrace/connection/secret_key' => $this->om->get(EncryptorInterface::class)->encrypt('cdp_sk_test')] as $path => $value) {
+        foreach (static::SETTINGS + ['onetrace/connection/secret_key' => $this->om->get(EncryptorInterface::class)->encrypt('cdp_sk_test'), 'onetrace/connection/identity_key' => ''] as $path => $value) {
             $writer->saveConfig($path, (string) $value);
         }
 

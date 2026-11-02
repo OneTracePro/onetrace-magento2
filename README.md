@@ -44,6 +44,7 @@ bin/magento setup:static-content:deploy
 1. In your OneTrace project, open **API keys** and create a write key (for the storefront) and a secret key with the `products.write` permission (for the server; add `messages.send` to send the store's emails through OneTrace).
 2. In **Stores → Configuration → OneTrace** enter the platform address (the domain you open OneTrace at) and both keys, then click **Test connection**.
 3. Make sure Magento cron runs: the queue is sent every minute.
+4. Optionally, the **Identity key** from **Site → Connection → Server** of the project (stored encrypted, like the secret key): the private customer section `onetrace` then carries the signature of the signed-in customer's id (HMAC-SHA256 of the id with the key), and the tracker gets `cdp.identify(id, {}, { userHash })` — with the full page cache too. Once the store and your apps sign user ids, turn on **Require signature** in the project: OneTrace stops trusting a user id from a browser without the signature, so a visitor cannot link their browser to someone else's profile. The key never goes to the browser.
 
 ## Shipments and delivery
 

@@ -1,6 +1,7 @@
 "%1 products are queued; cron uploads them in the background.","%1 products are queued; cron uploads them in the background."
 "Write key","Write key"
 "Secret key","Secret key"
+"Identity key","Identity key"
 "%1 is not set.","%1 is not set."
 "%1: project ""%2"".","%1: project ""%2""."
 "The key has no products.write permission: the catalog will not be uploaded.","The key has no products.write permission: the catalog will not be uploaded."
@@ -15,6 +16,7 @@ Connection,Connection
 "The address you open the platform at, e.g. https://cdp.onetrace.pro or the domain of your brand.","The address you open the platform at, e.g. https://cdp.onetrace.pro or the domain of your brand."
 "cdp_wk_… — for the tracker on the storefront.","cdp_wk_… — for the tracker on the storefront."
 "cdp_sk_… with the products.write permission — for orders, customers and the catalog.","cdp_sk_… with the products.write permission — for orders, customers and the catalog."
+"cdp_ik_… from Site → Connection → Server of the platform — signs the id of the signed-in customer for the tracker, so OneTrace trusts it when the project requires signed user ids.","cdp_ik_… from Site → Connection → Server of the platform — signs the id of the signed-in customer for the tracker, so OneTrace trusts it when the project requires signed user ids."
 "Connection check","Connection check"
 "What to send","What to send"
 Tracker,Tracker

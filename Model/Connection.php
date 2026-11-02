@@ -16,7 +16,7 @@ use OneTrace\Commerce\Messages;
  */
 class Connection
 {
-    public const VERSION = '1.11.0';
+    public const VERSION = '1.12.0';
 
     /** @var array<string, Client> */
     private array $clients = [];
@@ -46,6 +46,7 @@ class Connection
         if (!isset($this->clients[$cacheKey])) {
             $this->clients[$cacheKey] = new Client($this->config->url($storeId), [
                 $write ? 'write_key' : 'secret_key' => ($write ? $this->config->writeKey($storeId) : $this->config->secretKey($storeId)) ?: null,
+                'identity_key' => $this->config->identityKey($storeId) ?: null,
                 'timeout' => $timeouts[0],
                 'connect_timeout' => $timeouts[1],
                 // The queue retries with long pauses; the client must not hold the cron run.
@@ -55,6 +56,17 @@ class Connection
         }
 
         return $this->clients[$cacheKey];
+    }
+
+    /**
+     * The signature of a customer id for the tracker (the identity key of the store view); null without the key or
+     * without the storefront part.
+     */
+    public function userHash(int $storeId, string $userId): ?string
+    {
+        return $userId !== '' && $this->config->identityKey($storeId) !== '' && $this->config->storefront($storeId)
+            ? $this->client($storeId, 'write')->userHash($userId)
+            : null;
     }
 
     public function messages(int $storeId): Messages

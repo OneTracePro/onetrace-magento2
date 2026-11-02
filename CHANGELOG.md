@@ -2,6 +2,11 @@
 
 All notable changes are documented here. The project follows [Semantic Versioning](https://semver.org/).
 
+## 1.12.0 — 2026-11-02
+
+- Signed user ids (ADR-158 of the platform): **Stores → Configuration → OneTrace → Connection → Identity key** (`onetrace/connection/identity_key`, encrypted and sensitive, by store view) — the private section `onetrace` gets `hash` = HMAC-SHA256 of the customer's id with the key (`Client::userHash()`, onetrace-php 1.17), and `visitor.js` calls `cdp.identify(id, {}, { userHash })` also when the browser already knows the id but not this signature (`cdp_uhash` of the tracker 1.30.0). A project with "Require signature" drops a user id from the browser without it. The key never goes into the page.
+- Requires onetrace-php 1.17.
+
 ## 1.11.0 — 2026-10-24
 
 - Product descriptions in the catalog (onetrace-php 1.16): `description` of catalog items is the **Description** of the store view, or the **Short Description** when it has no text, without Magento directives (`{{widget}}`, `{{media}}`, `{{store}}`), `<style>`/`<script>` of Page Builder and comments; the library turns it into text of at most 5000 characters. Store views of the project in other languages send the translated description. OneTrace AI answers shoppers' questions about the product from it.

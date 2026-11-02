@@ -37,6 +37,7 @@
         <arguments>
             <argument name="sensitive" xsi:type="array">
                 <item name="onetrace/connection/secret_key" xsi:type="string">1</item>
+                <item name="onetrace/connection/identity_key" xsi:type="string">1</item>
             </argument>
         </arguments>
     </type>
