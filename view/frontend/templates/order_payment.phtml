@@ -1,0 +1,51 @@
+<?php
+/** @var \OneTrace\Connector\Block\StoreMcp\OrderPayment $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$order = $block->order();
+?>
+<?php if ($order !== null): ?>
+    <div class="onetrace-order-payment">
+        <?php if ($block->isCancelled()): ?>
+            <div class="message info"><span><?= $escaper->escapeHtml(__('This order is cancelled.')) ?></span></div>
+        <?php elseif ($block->isPaid()): ?>
+            <div class="message success"><span><?= $escaper->escapeHtml(__('This order is paid. Thank you!')) ?></span></div>
+        <?php else: ?>
+            <p><?= $escaper->escapeHtml(__('Your order is placed. Pay %1 as described below.', $block->price((float) $order->getTotalDue()))) ?></p>
+        <?php endif; ?>
+        <div class="table-wrapper order-items">
+            <table class="data table">
+                <thead>
+                    <tr>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Product')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Qty')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Subtotal')) ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($order->getAllVisibleItems() as $item): ?>
+                        <tr>
+                            <td><?= $escaper->escapeHtml((string) $item->getName()) ?></td>
+                            <td><?= (int) $item->getQtyOrdered() ?></td>
+                            <td><?= $escaper->escapeHtml($block->price((float) $item->getRowTotalInclTax())) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+                <tfoot>
+                    <?php if ((float) $order->getDiscountAmount() !== 0.0): ?>
+                        <tr><th colspan="2" scope="row"><?= $escaper->escapeHtml(__('Discount')) ?></th><td><?= $escaper->escapeHtml($block->price((float) $order->getDiscountAmount())) ?></td></tr>
+                    <?php endif; ?>
+                    <?php if (!$order->getIsVirtual()): ?>
+                        <tr><th colspan="2" scope="row"><?= $escaper->escapeHtml((string) $order->getShippingDescription()) ?></th><td><?= $escaper->escapeHtml($block->price((float) $order->getShippingInclTax())) ?></td></tr>
+                    <?php endif; ?>
+                    <tr class="grand_total"><th colspan="2" scope="row"><strong><?= $escaper->escapeHtml(__('Grand Total')) ?></strong></th><td><strong><?= $escaper->escapeHtml($block->price((float) $order->getGrandTotal())) ?></strong></td></tr>
+                </tfoot>
+            </table>
+        </div>
+        <div class="block block-order-details-view">
+            <div class="block-title"><strong><?= $escaper->escapeHtml(__('Payment Method')) ?></strong></div>
+            <div class="block-content">
+                <?= /* @noEscape */ $block->paymentHtml() ?>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>

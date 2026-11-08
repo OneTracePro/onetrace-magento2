@@ -73,6 +73,14 @@
         <arguments>
             <argument name="customers" xsi:type="object">OneTrace\Connector\Model\StoreMcp\Customers\Proxy</argument>
             <argument name="tools" xsi:type="object">OneTrace\Connector\Model\StoreMcp\Tools\Proxy</argument>
+            <argument name="orders" xsi:type="object">OneTrace\Connector\Model\StoreMcp\Orders\Proxy</argument>
+        </arguments>
+    </type>
+    <!-- Orders of the store MCP map catalog ids like cart links, without the visitor's cart and session. -->
+    <type name="OneTrace\Connector\Model\CartLink">
+        <arguments>
+            <argument name="cart" xsi:type="object">Magento\Checkout\Model\Cart\Proxy</argument>
+            <argument name="session" xsi:type="object">Magento\Checkout\Model\Session\Proxy</argument>
         </arguments>
     </type>
     <!-- Storefront links in emails sent from the admin and cron. -->

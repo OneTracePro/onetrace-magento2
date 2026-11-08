@@ -448,7 +448,7 @@ class Tools
      * Contract status: the state, "shipped" for a processing order with shipments and "delivered" for the
      * "Delivered order statuses".
      */
-    private function status(Order $order): string
+    public function status(Order $order): string
     {
         if (in_array((string) $order->getStatus(), $this->config->deliveredStatuses((int) $order->getStoreId()), true)) {
             return 'delivered';

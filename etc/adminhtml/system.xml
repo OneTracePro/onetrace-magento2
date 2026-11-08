@@ -143,7 +143,7 @@
             </group>
             <group id="store_mcp" translate="label comment" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>AI chat bot: store MCP</label>
-                <comment>The AI bot of the OneTrace chat answers customers with live store data — order status, tracking, stock, shipping, returns — and, if you allow it, cancels unpaid orders and passes return and delivery change requests to the staff. Customers are confirmed by the login on the storefront or by a code the store sends by email. The secret key needs the chats.manage permission; the AI chat of the project is paid from its balance.</comment>
+                <comment>The AI bot of the OneTrace chat answers customers with live store data — order status, tracking, stock, shipping, returns — and, if you allow it, cancels unpaid orders and passes return and delivery change requests to the staff. With "Price an order" and "Place an order" allowed, shoppers' AI assistants (ChatGPT, Claude …) place orders through the store MCP of OneTrace: the customer confirms the email with a code, agrees to the total and pays by the link to the order page. Customers are confirmed by the login on the storefront or by a code the store sends by email. The secret key needs the chats.manage permission; the AI chat of the project is paid from its balance.</comment>
                 <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Connect to the chat bot</label>
                     <comment>Saving connects the store to the bot of the project (Chats → Chat settings → Bot → Store MCP).</comment>
@@ -151,7 +151,7 @@
                 </field>
                 <field id="tools" translate="label comment" type="multiselect" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>What the bot may do</label>
-                    <comment>Actions run only after the customer clearly agrees in the chat; the bot cancels only orders with nothing paid.</comment>
+                    <comment>Actions run only after the customer clearly agrees in the chat or the AI assistant; the bot cancels only orders with nothing paid. AI assistants place orders when both order tools are allowed.</comment>
                     <source_model>OneTrace\Connector\Model\Source\StoreMcpTools</source_model>
                     <can_be_empty>1</can_be_empty>
                     <depends><field id="enabled">1</field></depends>
@@ -182,6 +182,13 @@
                 <field id="request_template" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Request email template</label>
                     <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+                <field id="payment_methods" translate="label comment" type="multiselect" sortOrder="75" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Payment methods of orders from AI assistants</label>
+                    <comment>Orders are placed without the customer on the storefront: only methods that need no payment details at the checkout work — Check / Money order, Bank Transfer, Cash On Delivery, or a payment link method of a payment extension. The customer gets a link to the order page with the payment instructions. A zero total is placed with "No Payment Information Required".</comment>
+                    <source_model>Magento\Payment\Model\Config\Source\Allmethods</source_model>
+                    <can_be_empty>1</can_be_empty>
                     <depends><field id="enabled">1</field></depends>
                 </field>
                 <field id="state" translate="label" type="label" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">

@@ -13,10 +13,12 @@ use OneTrace\Connector\Model\Config;
 use OneTrace\Connector\Model\Connection;
 use OneTrace\Connector\Model\Mapper;
 use OneTrace\Connector\Model\Queue;
+use OneTrace\Connector\Model\StoreMcp\AssistantOrders;
 use Psr\Log\LoggerInterface;
 
 /**
- * The order is placed (any checkout, REST, GraphQL or admin): identify with the order data and order_completed.
+ * The order is placed (any checkout, REST, GraphQL or admin): identify with the order data and order_completed; an
+ * order of a shopper's AI assistant (store MCP, contract v2) carries the assistant in properties.ai_assistant.
  */
 class OrderPlaced implements ObserverInterface
 {
@@ -26,6 +28,7 @@ class OrderPlaced implements ObserverInterface
         private readonly Mapper $mapper,
         private readonly Queue $queue,
         private readonly SubscriberFactory $subscribers,
+        private readonly AssistantOrders $assistantOrders,
         private readonly LoggerInterface $logger,
     ) {
     }
@@ -55,7 +58,14 @@ class OrderPlaced implements ObserverInterface
 
             $messages = $this->connection->messages($storeId);
             $this->queue->event($storeId, $messages->identify($model->customer, $this->consents($order), $model->placedAt));
-            $this->queue->event($storeId, $messages->orderCompleted($model));
+            $event = $messages->orderCompleted($model);
+            $origin = $this->assistantOrders->originOfQuote((int) $order->getQuoteId());
+
+            if ($origin !== null && $origin['assistant'] !== null) {
+                $event['properties']['ai_assistant'] = $origin['assistant'];
+            }
+
+            $this->queue->event($storeId, $event);
         } catch (\Throwable $error) {
             $this->logger->error('OneTrace: order ' . $order->getIncrementId() . ': ' . $error->getMessage());
         }

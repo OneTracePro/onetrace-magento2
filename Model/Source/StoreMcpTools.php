@@ -26,9 +26,11 @@ class StoreMcpTools implements OptionSourceInterface
             'store_check_availability' => __('Product availability'),
             'store_get_delivery_options' => __('Shipping methods'),
             'store_get_return_policy' => __('Return policy'),
+            'store_quote_order' => __('Price an order: products, delivery and total'),
             'store_cancel_order' => __('Action: cancel an unpaid order'),
             'store_create_return' => __('Action: return request to the staff'),
             'store_change_delivery' => __('Action: delivery change request to the staff'),
+            'store_create_order' => __('Action: place an order (AI shopping assistants and the chat bot)'),
         ];
         $options = [];
 

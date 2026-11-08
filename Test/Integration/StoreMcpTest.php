@@ -66,7 +66,7 @@ final class StoreMcpTest extends TestCase
         $init = $this->rpc('initialize')['data']['result'];
         $tools = array_column($this->rpc('tools/list')['data']['result']['tools'], 'name');
 
-        self::assertSame(['version' => 1], $init['capabilities']['experimental']['onetrace/store']);
+        self::assertSame(['version' => 2], $init['capabilities']['experimental']['onetrace/store']);
         self::assertContains('store_cancel_order', $tools);
         self::assertNotContains('store_create_return', $tools);
         self::assertSame(401, $this->rpc('tools/list', [], 'wrong-key')['status']);
@@ -174,6 +174,8 @@ final class StoreMcpTest extends TestCase
         $this->platform->responder = static fn (Request $request): ?Response => (string) parse_url($request->getUrl(), PHP_URL_PATH) === '/api/v1/chat/store-mcp' && $request->getMethod() === 'PUT'
             ? new Response(200, ['content-type' => 'application/json'], '{"status":"ok","error":null,"tools":["store_get_order"]}')
             : null;
+        // tests/env/smoke.sh saves the settings with the storefront address: only this test's connection counts.
+        $this->om->get(\Magento\Framework\FlagManager::class)->deleteFlag('onetrace_store_mcp_status');
 
         $this->storeMcp->connect();
         $put = $this->requests('PUT', '/api/v1/chat/store-mcp');

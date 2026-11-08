@@ -3,7 +3,9 @@
 # on a product page, /cdp-sw.js from the store root, the search box suggestions and the store search when the
 # platform does not answer, the "Notify when available" form instead of Magento's stock alert on a sold-out product,
 # the "Ask AI about this product" element after the "Add to cart" form,
-# the store MCP server at /onetrace/mcp (a POST without a form key, the platform key only), "Add to cart" of the
+# the store MCP server at /onetrace/mcp (a POST without a form key, the platform key only) with orders of AI shopping
+# assistants (contract v2: a quote, a guest order and its repeat with the same idempotency key, an order of an account,
+# the signed payment page), "Add to cart" of the
 # OneTrace search widget at /onetrace/cart/add (the form key from the cookie, as the widget sends it), a cart link
 # (?onetrace_cart=ID:QTY on any page) with the full page cache on.
 set -euo pipefail
@@ -12,7 +14,7 @@ NAME="onetrace-m2-${TAG//./-}"
 PORT="${MAGENTO_PORT:-8892}"
 
 PRODUCTS=$(docker exec "$NAME" sh -c '
-    for path in "onetrace/connection/url https://cdp.example.com" "onetrace/connection/write_key cdp_wk_smoke" "onetrace/widgets/push 1" "onetrace/widgets/product k3x9" "onetrace/parts/search 1" "catalog/productalert/allow_stock 1" "onetrace/connection/secret_key cdp_sk_smoke" "onetrace/store_mcp/enabled 1"; do
+    for path in "onetrace/connection/url https://cdp.example.com" "onetrace/connection/write_key cdp_wk_smoke" "onetrace/widgets/push 1" "onetrace/widgets/product k3x9" "onetrace/parts/search 1" "catalog/productalert/allow_stock 1" "onetrace/connection/secret_key cdp_sk_smoke" "onetrace/store_mcp/enabled 1" "onetrace/store_mcp/tools store_start_verification,store_verify,store_get_customer,store_check_availability,store_quote_order,store_create_order"; do
         php bin/magento config:set $path >/dev/null
     done
     php bin/magento cache:flush >/dev/null
@@ -25,10 +27,13 @@ PRODUCTS=$(docker exec "$NAME" sh -c '
         \$p = \$om->get(\Magento\Catalog\Api\ProductRepositoryInterface::class)->save(\$p);
         \$sold = \$om->create(\Magento\Catalog\Api\Data\ProductInterface::class)->setTypeId(\"simple\")->setAttributeSetId(4)->setSku(\$key . \"-sold\")->setUrlKey(\$key . \"-sold\")->setName(\"Smoke sold out\")->setPrice(10)->setVisibility(4)->setStatus(1)->setWebsiteIds([1])->setStockData([\"use_config_manage_stock\" => 1, \"qty\" => 0, \"is_in_stock\" => 0]);
         \$sold = \$om->get(\Magento\Catalog\Api\ProductRepositoryInterface::class)->save(\$sold);
-        echo \$key, \" \", \$sold->getId(), \" \", \$om->get(\OneTrace\Connector\Model\StoreMcp::class)->key(), \" \", \$p->getId();
+        \$account = \$om->create(\Magento\Customer\Api\Data\CustomerInterface::class)->setEmail(\$key . \"-account@example.com\")->setFirstname(\"Anna\")->setLastname(\"Schmidt\")->setWebsiteId(1)->setStoreId(1);
+        \$account = \$om->get(\Magento\Customer\Api\AccountManagementInterface::class)->createAccount(\$account);
+        \$mcp = \$om->get(\OneTrace\Connector\Model\StoreMcp::class);
+        echo \$key, \" \", \$sold->getId(), \" \", \$mcp->key(), \" \", \$p->getId(), \" \", \$mcp->tokens()->issueGuest(\$key . \"-guest@example.com\"), \" \", \$mcp->tokens()->issue(\"customer:\" . \$account->getId());
     "')
 
-read -r URL_KEY SOLD_ID MCP_KEY PRODUCT_ID <<<"$PRODUCTS"
+read -r URL_KEY SOLD_ID MCP_KEY PRODUCT_ID GUEST_TOKEN ACCOUNT_TOKEN <<<"$PRODUCTS"
 
 check() {
     if ! grep -qF -- "$3" <<<"$2"; then
@@ -80,7 +85,56 @@ MCP_DENIED=$(curl -sS -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: a
 MCP=$(curl -fsS -X POST -H 'Content-Type: application/json' -H "Authorization: Bearer $MCP_KEY" -d "$MCP_INIT" "http://localhost:$PORT/onetrace/mcp")
 
 check "store MCP refuses another key" "$MCP_DENIED" "401"
-check "store MCP contract" "$MCP" '"onetrace/store":{"version":1}'
+check "store MCP contract" "$MCP" '"onetrace/store":{"version":2}'
+
+# Orders of AI shopping assistants: tools/call of the order tools as the platform sends them.
+mcp_call() {
+    curl -fsS -X POST -H 'Content-Type: application/json' -H "Authorization: Bearer $MCP_KEY" \
+        -d "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"$1\",\"arguments\":$2,\"_meta\":$3}}" "http://localhost:$PORT/onetrace/mcp"
+}
+ITEMS="[{\"product_id\":\"$PRODUCT_ID\",\"quantity\":2},{\"product_id\":\"$SOLD_ID\",\"quantity\":1}]"
+SHIPPING='{"first_name":"Anna","last_name":"Schmidt","phone":"+49 151 1234-5678","country":"DE","city":"Berlin","postcode":"10119","address":"Torstraße 1"}'
+ORDER_KEY="smoke-$URL_KEY"
+# Magento sends the order email on the storefront: to Mailpit of the image (tests/env/run.sh starts it).
+docker exec "$NAME" sh -c 'php bin/magento config:set system/smtp/disable 0 >/dev/null && php bin/magento config:set system/smtp/transport smtp >/dev/null && php bin/magento config:set system/smtp/host 127.0.0.1 >/dev/null && php bin/magento config:set system/smtp/port 1025 >/dev/null && php bin/magento cache:clean config >/dev/null'
+GUEST_META="{\"onetrace/customer_token\":\"$GUEST_TOKEN\",\"onetrace/confirmed\":true,\"onetrace/idempotency_key\":\"$ORDER_KEY\",\"onetrace/source\":\"assistant\",\"onetrace/assistant\":\"chatgpt\"}"
+QUOTE=$(mcp_call store_quote_order "{\"items\":$ITEMS,\"shipping\":{\"country\":\"DE\",\"city\":\"Berlin\",\"postcode\":\"10119\"}}" '{"onetrace/source":"assistant","onetrace/assistant":"chatgpt"}')
+GUEST_ORDER=$(mcp_call store_create_order "{\"items\":[{\"product_id\":\"$PRODUCT_ID\",\"quantity\":2}],\"shipping\":$SHIPPING,\"shipping_method\":\"flatrate_flatrate\",\"payment_method\":\"checkmo\"}" "$GUEST_META")
+GUEST_AGAIN=$(mcp_call store_create_order "{\"items\":[{\"product_id\":\"$PRODUCT_ID\",\"quantity\":2}],\"shipping\":$SHIPPING,\"shipping_method\":\"flatrate_flatrate\",\"payment_method\":\"checkmo\"}" "$GUEST_META")
+ACCOUNT_ORDER=$(mcp_call store_create_order "{\"items\":[{\"product_id\":\"$PRODUCT_ID\",\"quantity\":1}],\"shipping\":$SHIPPING,\"shipping_method\":\"flatrate_flatrate\"}" "{\"onetrace/customer_token\":\"$ACCOUNT_TOKEN\",\"onetrace/confirmed\":true,\"onetrace/idempotency_key\":\"$ORDER_KEY\",\"onetrace/source\":\"assistant\",\"onetrace/assistant\":\"claude\"}")
+GUEST_NUMBER=$(sed -n 's/.*"structuredContent":{"order":"\([^"]*\)".*/\1/p' <<<"$GUEST_ORDER")
+ACCOUNT_NUMBER=$(sed -n 's/.*"structuredContent":{"order":"\([^"]*\)".*/\1/p' <<<"$ACCOUNT_ORDER")
+ORDER_MAIL=$(docker exec "$NAME" curl -fsS "http://127.0.0.1:8025/api/v1/search?query=to:$URL_KEY-guest@example.com")
+docker exec "$NAME" sh -c 'php bin/magento config:set system/smtp/disable 1 >/dev/null && php bin/magento cache:clean config >/dev/null'
+PAY_URL=$(sed -n 's/.*"payment_url":"\([^"]*\)".*/\1/p' <<<"$GUEST_ORDER" | sed 's#\\/#/#g')
+PAY_PAGE=$(curl -fsS "$PAY_URL")
+PAY_FORGED=$(curl -sS -o /dev/null -w '%{http_code}' "${PAY_URL%signature=*}signature=0000")
+ORDER_ROW=$(docker exec "$NAME" php -r "
+    require \"app/bootstrap.php\";
+    \$om = \Magento\Framework\App\Bootstrap::create(BP, \$_SERVER)->getObjectManager();
+    \$orders = \$om->get(\Magento\Sales\Model\ResourceModel\Order\CollectionFactory::class)->create()->addFieldToFilter(\"increment_id\", [\"in\" => [\"$GUEST_NUMBER\", \"$ACCOUNT_NUMBER\"]]);
+    foreach (\$orders as \$order) {
+        echo \$order->getIncrementId(), \":\", \$order->getCustomerIsGuest() ? \"guest\" : \"account\", \":\", \$order->getCustomerEmail(), \":\", \$order->getPayment()->getMethod(), \" \";
+    }
+    echo count(\$om->get(\Magento\Sales\Model\ResourceModel\Order\CollectionFactory::class)->create()->addFieldToFilter(\"customer_email\", \"$URL_KEY-guest@example.com\"));
+")
+
+check "quote prices the products" "$QUOTE" "\"items\":[{\"product_id\":\"$PRODUCT_ID\",\"name\":\"Smoke\",\"quantity\":2,\"price\":{\"amount\":10,"
+check "quote lists the sold-out product as unavailable" "$QUOTE" "\"unavailable\":[\"$SOLD_ID\"]"
+check "quote has the delivery methods of the address" "$QUOTE" '"shipping_methods":[{"id":"flatrate_flatrate"'
+check "quote has the payment methods" "$QUOTE" '"payment_methods":[{"id":"checkmo"'
+check "guest order is placed unpaid with a payment link" "$GUEST_ORDER" '"status":"pending","total":{"amount":30,'
+check "guest order payment status" "$GUEST_ORDER" '"payment_status":"pending","payment_url":"http'
+check "repeat with the same idempotency key is the same order" "$GUEST_AGAIN" "\"order\":\"$GUEST_NUMBER\""
+check "one guest order for the key" "$ORDER_ROW" " 1"
+check "guest order of the confirmed email" "$ORDER_ROW" "$GUEST_NUMBER:guest:$URL_KEY-guest@example.com:checkmo"
+check "the same key of another customer is another order" "$ORDER_ROW" "$ACCOUNT_NUMBER:account:$URL_KEY-account@example.com:checkmo"
+refute "account order is not the guest order" "$ACCOUNT_NUMBER" "$GUEST_NUMBER"
+check "order email to the guest" "$ORDER_MAIL" 'order confirmation"'
+check "payment page shows the order" "$PAY_PAGE" "$GUEST_NUMBER"
+check "payment page shows the payment instructions" "$PAY_PAGE" "Check / Money order"
+check "payment page is not indexed" "$PAY_PAGE" 'content="NOINDEX,NOFOLLOW"'
+check "forged payment link is not found" "$PAY_FORGED" "404"
 
 CART_URL="http://localhost:$PORT/onetrace/cart/add/id/$PRODUCT_ID"
 CART_DENIED=$(curl -sS -o /dev/null -w '%{http_code}' -X POST -b 'form_key=smokeFormKey0001' -d 'quantity=1&form_key=smokeFormKey0001' "$CART_URL")

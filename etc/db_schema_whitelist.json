@@ -72,5 +72,25 @@
             "onetrace_loyalty_discount": true,
             "base_onetrace_loyalty_discount": true
         }
+    },
+    "onetrace_assistant_order": {
+        "column": {
+            "id": true,
+            "idempotency_key": true,
+            "store_id": true,
+            "quote_id": true,
+            "order_id": true,
+            "source": true,
+            "assistant": true,
+            "created_at": true
+        },
+        "index": {
+            "ONETRACE_ASSISTANT_ORDER_QUOTE_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ONETRACE_ASSISTANT_ORDER_IDEMPOTENCY_KEY": true,
+            "ONETRACE_ASSISTANT_ORDER_ORDER_ID_SALES_ORDER_ENTITY_ID": true
+        }
     }
 }

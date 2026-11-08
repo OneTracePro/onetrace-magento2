@@ -162,11 +162,12 @@ class CartLink
     }
 
     /**
-     * The product to add and its buy request, or null when it cannot be added.
+     * The product to add and its buy request, or null when it cannot be added. Orders of the store MCP map catalog ids
+     * to cart products the same way.
      *
      * @return array{0: Product, 1: array<string, mixed>}|null
      */
-    private function candidate(int $id, int $quantity, int $storeId, int $websiteId): ?array
+    public function candidate(int $id, int $quantity, int $storeId, int $websiteId): ?array
     {
         $product = $this->product($id, $storeId, $websiteId);
 
@@ -227,7 +228,7 @@ class CartLink
     }
 
     /** An enabled product of the website, or null. */
-    private function product(int $id, int $storeId, int $websiteId): ?Product
+    public function product(int $id, int $storeId, int $websiteId): ?Product
     {
         try {
             $product = $this->products->getById($id, false, $storeId, true);

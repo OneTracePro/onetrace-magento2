@@ -32,6 +32,29 @@
         </constraint>
         <constraint xsi:type="foreign" referenceId="ONETRACE_ORDER_ORDER_ID_SALES_ORDER_ENTITY_ID" table="onetrace_order" column="order_id" referenceTable="sales_order" referenceColumn="entity_id" onDelete="CASCADE"/>
     </table>
+    <!-- Orders of the store MCP (contract v2): the idempotency key (sha256 of the store view, the customer and the key
+         of the platform), reserved before the order is placed; the quote right before the submit; the chat bot or an AI
+         shopping assistant that placed it. -->
+    <table name="onetrace_assistant_order" resource="default" engine="innodb" comment="OneTrace orders from AI assistants">
+        <column xsi:type="int" name="id" unsigned="true" nullable="false" identity="true"/>
+        <column xsi:type="varchar" name="idempotency_key" nullable="false" length="64"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" default="0"/>
+        <column xsi:type="int" name="quote_id" unsigned="true" nullable="true"/>
+        <column xsi:type="int" name="order_id" unsigned="true" nullable="true"/>
+        <column xsi:type="varchar" name="source" nullable="false" length="16" default="chat"/>
+        <column xsi:type="varchar" name="assistant" nullable="true" length="32"/>
+        <column xsi:type="datetime" name="created_at" nullable="false"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ONETRACE_ASSISTANT_ORDER_IDEMPOTENCY_KEY">
+            <column name="idempotency_key"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="ONETRACE_ASSISTANT_ORDER_ORDER_ID_SALES_ORDER_ENTITY_ID" table="onetrace_assistant_order" column="order_id" referenceTable="sales_order" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <index referenceId="ONETRACE_ASSISTANT_ORDER_QUOTE_ID" indexType="btree">
+            <column name="quote_id"/>
+        </index>
+    </table>
     <!-- Bonus points of the OneTrace loyalty program: the hold of the cart, the discount in the totals of the quote,
          order, invoice and credit memo, the confirmation of the order. -->
     <table name="quote" resource="checkout">

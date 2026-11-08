@@ -40,6 +40,7 @@
                 <code_template>onetrace_store_mcp_code_template</code_template>
                 <request_identity>sales</request_identity>
                 <request_template>onetrace_store_mcp_request_template</request_template>
+                <payment_methods>checkmo,banktransfer,cashondelivery</payment_methods>
             </store_mcp>
             <promo>
                 <pools/>

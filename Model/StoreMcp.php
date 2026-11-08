@@ -12,6 +12,7 @@ use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use OneTrace\Connector\Model\StoreMcp\CacheCodeStore;
 use OneTrace\Connector\Model\StoreMcp\Customers;
+use OneTrace\Connector\Model\StoreMcp\Orders;
 use OneTrace\Connector\Model\StoreMcp\Tools;
 use OneTrace\StoreMcp\CustomerTokens;
 use OneTrace\StoreMcp\Server;
@@ -19,20 +20,22 @@ use OneTrace\StoreMcp\Verification;
 use Psr\Log\LoggerInterface;
 
 /**
- * MCP server of the store for the OneTrace AI chat bot (store MCP contract v1): POST /onetrace/mcp of a store view.
- * The bot reads orders, tracking, stock, delivery and the return policy, and — when the owner allows it in the
- * settings — cancels unpaid orders and passes return and delivery change requests to the staff. Customers are
- * confirmed by the login on the storefront (cdp.chatCustomer() from the private "onetrace" section) or by a code
- * the store sends by email. Customer ids: "customer:<id>" or "email:<address>" (guest orders).
+ * MCP server of the store for the OneTrace AI chat bot and shoppers' AI assistants (store MCP contract v2):
+ * POST /onetrace/mcp of a store view. The bot reads orders, tracking, stock, delivery and the return policy, and —
+ * when the owner allows it in the settings — cancels unpaid orders, passes return and delivery change requests to the
+ * staff, prices and places orders (store_quote_order, store_create_order; AI assistants such as ChatGPT or Claude
+ * through the store MCP of OneTrace). Customers are confirmed by the login on the storefront (cdp.chatCustomer() from
+ * the private "onetrace" section) or by a code the store sends by email; a code for an order goes to any email (a
+ * guest order). Customer ids: "customer:<id>" or "email:<address>" (guest orders).
  *
  * The platform key and the token secret are generated once and kept encrypted in flags. Store views of one project
  * and website share one connection: the first of them is connected, so the bot does not get the same tools twice.
  */
 class StoreMcp
 {
-    public const READ_TOOLS = ['store_start_verification', 'store_verify', 'store_get_customer', 'store_find_orders', 'store_get_order', 'store_get_tracking', 'store_check_availability', 'store_get_delivery_options', 'store_get_return_policy'];
+    public const READ_TOOLS = ['store_start_verification', 'store_verify', 'store_get_customer', 'store_find_orders', 'store_get_order', 'store_get_tracking', 'store_check_availability', 'store_get_delivery_options', 'store_get_return_policy', 'store_quote_order'];
 
-    public const ACTIONS = ['store_cancel_order', 'store_create_return', 'store_change_delivery'];
+    public const ACTIONS = ['store_cancel_order', 'store_create_return', 'store_change_delivery', 'store_create_order'];
 
     private const SECRETS_FLAG = 'onetrace_store_mcp';
 
@@ -48,6 +51,7 @@ class StoreMcp
         private readonly CacheCodeStore $codes,
         private readonly Customers $customers,
         private readonly Tools $tools,
+        private readonly Orders $orders,
         private readonly LoggerInterface $logger,
     ) {
     }
@@ -72,6 +76,7 @@ class StoreMcp
     public function server(int $storeId): Server
     {
         $tools = $this->tools;
+        $orders = $this->orders;
 
         return new Server($this->key(), $this->tokens(), [
             'store_get_customer' => [$tools, 'customer'],
@@ -84,11 +89,15 @@ class StoreMcp
             'store_cancel_order' => [$tools, 'cancel'],
             'store_create_return' => [$tools, 'createReturn'],
             'store_change_delivery' => [$tools, 'changeDelivery'],
+            'store_quote_order' => [$orders, 'quote'],
+            'store_create_order' => [$orders, 'create'],
         ], [
             'name' => 'magento2:' . (string) parse_url((string) $this->storeManager->getStore($storeId)->getBaseUrl(), PHP_URL_HOST),
             'version' => Connection::VERSION,
             'enabled' => $this->allowedTools($storeId),
             'verification' => new Verification($this->codes, [$this->customers, 'find'], [$this->customers, 'sendCode']),
+            // Action results for a day in the cache; orders are also found by their key in onetrace_assistant_order.
+            'idempotency' => $this->codes,
         ]);
     }
 

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <block class="OneTrace\Connector\Block\StoreMcp\OrderPayment" name="onetrace.order.payment" template="OneTrace_Connector::order_payment.phtml" cacheable="false"/>
+        </referenceContainer>
+    </body>
+</page>
