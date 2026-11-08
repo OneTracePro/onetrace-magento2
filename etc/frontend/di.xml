@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <!-- /cdp-sw.js: the Web Push service worker must come from the store's own domain. -->
+    <!-- /cdp-sw.js: the Web Push service worker must come from the store's own domain.
+         ?onetrace_cart=ID:QTY,… on any storefront page: a cart link of OneTrace fills the cart and redirects to it. -->
     <type name="Magento\Framework\App\RouterList">
         <arguments>
             <argument name="routerList" xsi:type="array">
@@ -8,6 +9,11 @@
                     <item name="class" xsi:type="string">OneTrace\Connector\Controller\ServiceWorkerRouter</item>
                     <item name="disable" xsi:type="boolean">false</item>
                     <item name="sortOrder" xsi:type="string">5</item>
+                </item>
+                <item name="onetrace_cart_link" xsi:type="array">
+                    <item name="class" xsi:type="string">OneTrace\Connector\Controller\CartLinkRouter</item>
+                    <item name="disable" xsi:type="boolean">false</item>
+                    <item name="sortOrder" xsi:type="string">4</item>
                 </item>
             </argument>
         </arguments>

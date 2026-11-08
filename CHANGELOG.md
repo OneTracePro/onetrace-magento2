@@ -2,6 +2,11 @@
 
 All notable changes are documented here. The project follows [Semantic Versioning](https://semver.org/).
 
+## 1.13.0 — 2026-11-08
+
+- Cart links of OneTrace (the `create_cart` tool the platform gives shoppers' AI assistants, ChatGPT and Claude): `?onetrace_cart=ID:QTY,ID:QTY` on any storefront page — the product ids of the uploaded catalog, split on the last colon, the first 20 valid pairs, quantities clamped to 1–99 — adds the products to the visitor's own cart on the server (the checkout session, guests too, no form key) with Magento's stock and quantity checks and cart events, and redirects (302) to the cart with every other parameter of the link (`utm_*`), where the tracker records the visit; the mini cart reloads (`section_data_clean`). A simple product of a configurable one that is not visible on its own goes to the cart as the configurable product with its attribute values; configurable products without a variant, unknown, disabled, sold-out products, required options and products the cart refuses are skipped, and a refused product leaves the cart as it was. Nothing added — a redirect to the same page without `onetrace_cart`.
+- The link is taken by a router before the others (`OneTrace\Connector\Controller\CartLinkRouter`), the answer has `Cache-Control: no-store`: never kept by the built-in full page cache or Varnish. Magento's VCL removes `utm_*` before Magento sees them; the README shows how to keep them for cart links.
+
 ## 1.12.0 — 2026-11-02
 
 - Signed user ids (ADR-158 of the platform): **Stores → Configuration → OneTrace → Connection → Identity key** (`onetrace/connection/identity_key`, encrypted and sensitive, by store view) — the private section `onetrace` gets `hash` = HMAC-SHA256 of the customer's id with the key (`Client::userHash()`, onetrace-php 1.17), and `visitor.js` calls `cdp.identify(id, {}, { userHash })` also when the browser already knows the id but not this signature (`cdp_uhash` of the tracker 1.30.0). A project with "Require signature" drops a user id from the browser without it. The key never goes into the page.

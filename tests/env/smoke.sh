@@ -4,7 +4,8 @@
 # platform does not answer, the "Notify when available" form instead of Magento's stock alert on a sold-out product,
 # the "Ask AI about this product" element after the "Add to cart" form,
 # the store MCP server at /onetrace/mcp (a POST without a form key, the platform key only), "Add to cart" of the
-# OneTrace search widget at /onetrace/cart/add (the form key from the cookie, as the widget sends it).
+# OneTrace search widget at /onetrace/cart/add (the form key from the cookie, as the widget sends it), a cart link
+# (?onetrace_cart=ID:QTY on any page) with the full page cache on.
 set -euo pipefail
 TAG="${MAGENTO_TAG:-php84-fpm-magento2.4.8-p5}"
 NAME="onetrace-m2-${TAG//./-}"
@@ -91,3 +92,25 @@ check "cart of the search widget refuses a request without X-Requested-With" "$C
 check "cart of the search widget checks the form key" "$CART_FORM_KEY" "403"
 check "cart of the search widget adds a product" "$CART" '{"ok":true,"count":2}'
 check "cart of the search widget sends a sold-out product to its page" "$CART_SOLD" "\"redirect\":\"http:\\/\\/localhost:$PORT\\/$URL_KEY-sold.html\""
+
+# A cart link of OneTrace on a page the full page cache already keeps: never served from the cache, the products go to
+# the visitor's own cart, the redirect keeps the utm tags.
+curl -fsS -o /dev/null "http://localhost:$PORT/$URL_KEY.html"
+CACHED=$(curl -sS -o /dev/null -D - "http://localhost:$PORT/$URL_KEY.html")
+LINK="http://localhost:$PORT/$URL_KEY.html?utm_source=chatgpt&onetrace_cart=$PRODUCT_ID%3A2&utm_medium=ai_assistant&utm_campaign=shopper_mcp"
+LINK_FIRST=$(curl -sS -o /dev/null -D - "$LINK")
+LINK_SECOND=$(curl -sS -o /dev/null -D - "$LINK")
+LINK_SESSION=$(sed -n 's/^[Ss]et-[Cc]ookie: \(PHPSESSID=[^;]*\).*/\1/p' <<<"$LINK_SECOND")
+LINK_CART=$(curl -fsS -b "$LINK_SESSION" "http://localhost:$PORT/checkout/cart/?utm_source=chatgpt&utm_medium=ai_assistant&utm_campaign=shopper_mcp" | tr -d '\n ')
+LINK_NOTHING=$(curl -sS -o /dev/null -D - "http://localhost:$PORT/$URL_KEY.html?onetrace_cart=$SOLD_ID:1,999999999:1&utm_source=chatgpt")
+
+check "the product page is in the full page cache" "$CACHED" "X-Magento-Cache-Debug: HIT"
+for answer in "$LINK_FIRST" "$LINK_SECOND"; do
+    check "cart link redirects to the cart with the utm tags" "$answer" "Location: http://localhost:$PORT/checkout/cart/?utm_source=chatgpt&utm_medium=ai_assistant&utm_campaign=shopper_mcp"
+    check "cart link is not cached" "$answer" "Cache-Control: max-age=0, must-revalidate, no-cache, no-store"
+    refute "cart link is not served from the full page cache" "$answer" "X-Magento-Cache-Debug: HIT"
+    check "cart link reloads the mini cart" "$answer" "section_data_clean=default"
+done
+check "cart link fills the visitor's cart" "$LINK_CART" "data-cart-item-id=\"$URL_KEY\"value=\"2\""
+check "cart link without products to add goes to the same page" "$LINK_NOTHING" "Location: http://localhost:$PORT/$URL_KEY.html?utm_source=chatgpt"
+refute "cart link without products to add keeps the customer sections" "$LINK_NOTHING" "section_data_clean="

@@ -69,7 +69,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
             ->setName($data['name'] ?? 'Sneakers')
             ->setPrice($data['price'] ?? 49.95)
             ->setVisibility($data['visibility'] ?? Visibility::VISIBILITY_BOTH)
-            ->setStatus(Status::STATUS_ENABLED)
+            ->setStatus($data['status'] ?? Status::STATUS_ENABLED)
             ->setWebsiteIds([1])
             ->setStockData($data['stock'] ?? ['use_config_manage_stock' => 1, 'qty' => 100, 'is_in_stock' => 1]);
 
@@ -81,6 +81,10 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
             if (isset($data[$code])) {
                 $product->setData($code, $data[$code]);
             }
+        }
+
+        foreach ($data['attributes'] ?? [] as $code => $value) {
+            $product->setData($code, $value);
         }
 
         return $this->admin(fn () => $this->om->get(ProductRepositoryInterface::class)->save($product));

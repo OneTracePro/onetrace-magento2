@@ -11,6 +11,7 @@ Connects a Magento 2 / Adobe Commerce store to [OneTrace.pro](https://onetrace.p
 - Magento Open Source and Adobe Commerce 2.4.7–2.4.9, PHP 8.2–8.5
 - Orders and their statuses are sent from the server through a cron queue with retries: checkout never waits for the platform
 - Settings per store view: each store view can send to its own project; store views of one project in other languages translate its catalog
+- Cart links of shoppers' AI assistants (`?onetrace_cart=ID:QTY,…` on any page) fill the cart and open it, with the full page cache too
 - The same events and properties as every OneTrace shop plugin ([e-commerce contract](https://onetrace.pro/en/docs/api)), built on [onetrace-php](https://github.com/OneTracePro/onetrace-php)
 
 ## What it sends
@@ -130,6 +131,19 @@ Turn on **What to send → OneTrace search widget** and the search widget in **S
 - The search box shows the search layer of the tracker under it, also without **Product search**.
 - "Add to cart" posts to `/onetrace/cart/add/id/{id}` with the form key: simple and virtual products without required options go to the cart (Magento's stock and quantity checks, cart events) and the mini cart reloads; products with a choice (configurable, bundle, grouped, required custom options) or that cannot be bought open their page.
 - While the setting is on, the full page cache keeps results pages no longer than 10 minutes, so turning the widget on or off in OneTrace reaches cached pages. The widget off in OneTrace or any error of the platform keeps the results page described above.
+
+## Cart links from AI assistants
+
+Shoppers' AI assistants connected to OneTrace (ChatGPT, Claude) put a cart together with the `create_cart` tool of the platform and give the shopper a link to the store, for example:
+
+```
+https://shop.example.com/?onetrace_cart=1234:2,1250:1&utm_source=chatgpt&utm_medium=ai_assistant&utm_campaign=shopper_mcp
+```
+
+- `onetrace_cart` works on any storefront page: comma-separated `id:quantity` pairs with the product ids of the catalog the module uploads. The first 20 valid pairs count, quantities are clamped to 1–99, other pairs are ignored. No setting: the link only fills the cart of whoever opens it.
+- The products go to the visitor's own cart on the server — guests too, without a form key, since the shopper followed the link to their own cart — with Magento's stock and quantity checks and cart events, as with its own button. The id of a simple product of a configurable one that is not visible on its own adds the configurable product with that product's attribute values (a simple product visible on its own is added as it is). A configurable product without a chosen variant, unknown, disabled and sold-out products, products with required options and products the cart refuses are skipped; a refused product leaves the cart as it was, also a line of it added before.
+- The answer is a redirect (302) to the cart with the other parameters of the link (the utm tags in any order), where the tracker records the visit; the mini cart reloads (`section_data_clean`, as after switching the store view). When nothing could be added — the same page without `onetrace_cart`. The redirect has `Cache-Control: no-store`: the built-in full page cache does not keep it, Varnish with Magento's VCL keeps only 200 and 404 answers.
+- Varnish: Magento's VCL removes `utm_*` and other marketing parameters from the URL before the request reaches Magento, so the redirect to the cart keeps only the other ones. To keep the utm tags of cart links, skip that step for them in `vcl_recv`: `if (req.url !~ "[?&]onetrace_cart=" && req.url ~ "(\?|&)(gad_source|…|utm_[a-z]+|_bta_[a-z]+)=") {`.
 
 ## Communication preferences in My Account
 
