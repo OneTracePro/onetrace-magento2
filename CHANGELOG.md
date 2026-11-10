@@ -2,6 +2,13 @@
 
 All notable changes are documented here. The project follows [Semantic Versioning](https://semver.org/).
 
+## 1.15.0 — 2026-11-11
+
+- AI search (stage 95 of the platform, onetrace-php 1.19): with AI search on in **Site → Search** of OneTrace, the quick search of the store ("Product search") asks AI first (`search()->ai()`) for a query without filters of the layered navigation: AI reads it as catalog filters — category, brands, characteristics, price, words to exclude — and the results page shows the products it found in its order. The parse is waited for up to 2.5 seconds (`Plugin\Search::AI_WAIT`); a query the mode does not want, an AI error or no answer in time — the usual results.
+- Above the results of the first page — `<div data-cdp-search-ai>` (`Model\SearchAiBlock`, put before the results block by the plugin `afterToHtml` of `Magento\CatalogSearch\Block\Result`): the tracker writes the short AI answer there and draws the chips of what AI understood, the refinements and "Regular search". They open the results again with `ai_state` (the parse without a removed chip), `ai_refine` + `ai_previous` (a refinement) or `ai=0`.
+- The AI search mode comes with the search widget settings (`GET /search/widget`, kept in the Magento cache with the widget state, now as JSON): a project without AI search makes no extra request per search.
+- With the OneTrace search widget, AI search works in the widget of the tracker.
+
 ## 1.14.0 — 2026-11-08
 
 - Store MCP contract v2 — orders from shoppers' AI assistants (ChatGPT, Claude …) and the chat bot: the server announces version 2 and has `store_quote_order` and `store_create_order` (settings **What the bot may do → Price an order** and **Action: place an order**, off by default). A quote prices the products in a quote that is never saved (customer group prices, cart price rules, taxes, Magento's shipping rates for the address, payment methods; unavailable products listed), an order is placed through the quote submit for the confirmed account or as a guest order with the confirmed email (`purpose: "order"` codes go to any email), the state of a country that needs one taken from the address lines. Prices and stock are checked again (prices against the last quote of the same products and address); a repeat with the same idempotency key returns the same order — the key is kept in the new table `onetrace_assistant_order` with the quote before the submit, and the server keeps results in the Magento cache for a day.

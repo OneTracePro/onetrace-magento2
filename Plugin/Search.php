@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace OneTrace\Connector\Plugin;
 
 use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\UrlInterface;
 use Magento\Framework\Api\Search\DocumentFactory;
 use Magento\Framework\Api\Search\SearchCriteriaInterface;
 use Magento\Framework\Api\Search\SearchResultInterface;
@@ -14,6 +16,7 @@ use OneTrace\Commerce\Customer;
 use OneTrace\Connector\Model\Config;
 use OneTrace\Connector\Model\Connection;
 use OneTrace\Connector\Model\Queue;
+use OneTrace\Connector\Model\SearchAiBlock;
 use OneTrace\Connector\Model\SearchWidget;
 use Psr\Log\LoggerInterface;
 
@@ -23,6 +26,11 @@ use Psr\Log\LoggerInterface;
  * platform (word forms, typos, the wrong keyboard layout, the visitor's interests). Filters by other attributes,
  * sorting by name and any API error keep Magento's own search. With the OneTrace search widget the tracker draws the
  * results page and sends the search event itself: the platform is not asked here.
+ *
+ * AI search (the mode of Site → Search on the platform): a query without filters of the layered navigation goes to
+ * AI first — it reads it as catalog filters and the page shows the products found by them; the parse is waited for
+ * up to AI_WAIT seconds, otherwise (or when the mode does not want the query) the usual results. The first page gets
+ * the AI block above the results (Model\SearchAiBlock).
  */
 class Search
 {
@@ -36,6 +44,9 @@ class Search
 
     private const MAX_PER_PAGE = 48;
 
+    /** Seconds the results page waits for the AI parse of a query that is not in the cache yet. */
+    public const AI_WAIT = 2.5;
+
     public function __construct(
         private readonly Config $config,
         private readonly Connection $connection,
@@ -45,6 +56,9 @@ class Search
         private readonly DocumentFactory $documents,
         private readonly LoggerInterface $logger,
         private readonly SearchWidget $searchWidget,
+        private readonly RequestInterface $request,
+        private readonly UrlInterface $url,
+        private readonly SearchAiBlock $aiBlock,
     ) {
     }
 
@@ -67,11 +81,12 @@ class Search
         try {
             $text = (string) $params['q'];
             unset($params['q']);
-            $result = $this->connection->client($storeId, 'search')->search()->products($text, $params + array_filter([
+            $params += array_filter([
                 'anonymousId' => $this->connection->anonymousId(),
                 // The store view language: names and links of the catalog translations.
                 'language' => $this->config->locale($storeId),
-            ]));
+            ]);
+            $result = $this->ai($storeId, $text, $params) ?? $this->connection->client($storeId, 'search')->search()->products($text, $params);
         } catch (\Throwable $e) {
             $this->logger->warning('OneTrace search fell back to Magento: ' . $e->getMessage());
 
@@ -92,6 +107,60 @@ class Search
 
         // Layered navigation keeps the aggregations of Magento's search.
         return $native->setItems($documents)->setTotalCount((int) ($result['total'] ?? 0));
+    }
+
+    /**
+     * AI results of the query: the AI search mode is on and wants the query, no filters of the layered navigation, the
+     * parse came in AI_WAIT seconds; null — the usual search. The first page remembers the AI block.
+     *
+     * @param array<string, mixed> $params
+     *
+     * @return array<string, mixed>|null
+     */
+    private function ai(int $storeId, string $text, array $params): ?array
+    {
+        $choice = (string) $this->request->getParam('ai', '');
+        $refine = trim((string) $this->request->getParam('ai_refine', ''));
+        $state = SearchAiBlock::decode($this->request->getParam('ai_state'));
+        $previous = $refine !== '' ? SearchAiBlock::decode($this->request->getParam('ai_previous')) : null;
+
+        if ($choice === '0' || array_intersect_key($params, ['category' => 1, 'price_min' => 1, 'price_max' => 1]) !== [] || $this->searchWidget->aiMode($storeId) === null) {
+            return null;
+        }
+
+        $question = $previous !== null ? mb_substr($refine, 0, 200) : $text;
+
+        try {
+            $result = $this->connection->client($storeId, 'search')->search()->ai($question, $params + array_filter([
+                'asked' => $choice === '1',
+                'state' => $state,
+                'previous' => $previous,
+            ]), self::AI_WAIT);
+        } catch (\Throwable $e) {
+            $this->logger->warning('OneTrace AI search fell back to the usual search: ' . $e->getMessage());
+
+            return null;
+        }
+
+        $ai = $result['ai'] ?? null;
+
+        if (!is_array($ai)) {
+            return null;
+        }
+
+        if ((int) $params['page'] === 1) {
+            $this->aiBlock->set([
+                'url' => $this->url->getUrl('catalogsearch/result', ['_query' => ['q' => $text]]),
+                'turns' => $previous !== null ? [$text, $question] : [$text],
+                'state' => $ai['state'] ?? null,
+                'understood' => $ai['understood'] ?? [],
+                'refinements' => $ai['refinements'] ?? [],
+                'relaxed' => (int) ($ai['relaxed'] ?? 0),
+                'products' => array_slice(array_values(array_map(static fn ($item): string => is_array($item) ? (string) ($item['id'] ?? '') : '', (array) ($result['items'] ?? []))), 0, 6),
+            ]);
+        }
+
+        return $result;
     }
 
     /**

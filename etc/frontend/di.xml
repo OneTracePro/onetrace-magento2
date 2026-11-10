@@ -30,6 +30,9 @@
         <plugin name="onetrace_search" type="OneTrace\Connector\Plugin\Search"/>
     </type>
     <!-- Redirect rules of the platform: the results page of a query with a rule opens the rule's page. -->
+    <type name="Magento\CatalogSearch\Block\Result">
+        <plugin name="onetrace_search_ai_block" type="OneTrace\Connector\Plugin\SearchAiBlock"/>
+    </type>
     <type name="Magento\CatalogSearch\Controller\Result\Index">
         <plugin name="onetrace_search_redirect" type="OneTrace\Connector\Plugin\SearchRedirect"/>
     </type>

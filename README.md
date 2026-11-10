@@ -123,6 +123,7 @@ Turn on **Product search** in the settings (the plan of the project must include
 - A query with a redirect rule (Site → Search of the platform, e.g. "delivery" → the delivery page) opens the rule's page instead of the results. The full page cache does not store redirects, but a popular query cached before its rule was added shows the cached results until the cache is refreshed.
 - Filters by other attributes, sorting by name and any error of the platform keep Magento's own search. The layered navigation counts come from Magento's search.
 - Over the monthly search limit of the plan (402 `quota_exceeded`) the store search runs as usual until the limit frees up.
+- AI search: with AI search on in **Site → Search** of the platform, a query without filters of the layered navigation goes to AI first — it reads it as catalog filters, and the results page shows the products it found (the parse is waited for up to 2.5 seconds, otherwise the usual results). Above the results the tracker draws the short AI answer, the chips of what AI understood, refinements and "Regular search" (`<div data-cdp-search-ai>`, links with `ai_state`, `ai_refine`, `ai=0`). With the OneTrace search widget AI works in the widget itself.
 
 ### OneTrace search widget
 
